@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Клерк Спецпроекты — Музей</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ====== RESET ====== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0C0C0C;
+  --text:    #F5F5F0;
+  --accent:  #C8A96E;
+  --card:    #161616;
+  --border:  #2A2A2A;
+  --dim:     rgba(245,245,240,0.55);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  cursor: none;
+  overflow-x: hidden;
+}
+
+/* ====== CURSOR ====== */
+#cur-dot, #cur-ring {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: opacity .3s;
+}
+#cur-dot {
+  width: 6px; height: 6px;
+  background: var(--text);
+  z-index: 10000;
+}
+#cur-ring {
+  width: 44px; height: 44px;
+  border: 1px solid rgba(245,245,240,.5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; letter-spacing: .12em;
+  color: transparent;
+  transition: width .35s cubic-bezier(.16,1,.3,1),
+              height .35s cubic-bezier(.16,1,.3,1),
+              background .3s, border-color .3s, color .3s;
+}
+#cur-ring.card  { width: 80px; height: 80px; background: var(--accent); border-color: var(--accent); color: #0C0C0C; }
+#cur-ring.link  { width: 28px; height: 28px; }
+
+/* ====== PRELOADER ====== */
+#preloader {
+  position: fixed; inset: 0; z-index: 8000;
+  display: flex; pointer-events: none;
+}
+.pre-panel {
+  width: 50%; height: 100%;
+  background: var(--bg);
+  transition: transform .95s cubic-bezier(.76,0,.24,1) .3s;
+}
+.pre-panel.left  { transform-origin: left; }
+.pre-panel.right { transform-origin: right; }
+#preloader.open .pre-panel.left  { transform: translateX(-100%); }
+#preloader.open .pre-panel.right { transform: translateX(100%); }
+
+/* ====== NAVBAR ====== */
+#navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 48px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(12,12,12,.88);
+  backdrop-filter: blur(12px);
+  opacity: 0; transform: translateY(-8px);
+  transition: opacity .6s, transform .6s;
+}
+#navbar.vis { opacity: 1; transform: translateY(0); }
+.nav-logo { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; font-weight: 500; }
+.nav-logo em { color: var(--accent); font-style: normal; }
+.nav-right { display: flex; align-items: center; gap: 28px; }
+.nav-count { font-family: 'Courier New', monospace; font-size: 12px; color: var(--accent); letter-spacing: .1em; }
+.nav-cta {
+  font-size: 11px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--text); text-decoration: none;
+  padding: 8px 20px; border: 1px solid var(--border);
+  transition: border-color .3s, color .3s;
+}
+.nav-cta:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ====== HERO ====== */
+#hero {
+  position: relative; min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden; padding-top: 80px;
+}
+
+/* mosaic background */
+#hero-bg {
+  position: absolute; inset: 0;
+  display: grid;
+  grid-template-columns: repeat(7,1fr);
+  grid-template-rows: repeat(4,1fr);
+  gap: 3px; opacity: 0;
+  transition: opacity 1.2s ease;
+  will-change: transform;
+}
+#hero-bg.vis { opacity: .28; }
+.bg-cell { border-radius: 2px; }
+
+.hero-content {
+  position: relative; z-index: 2;
+  text-align: center; padding: 0 24px;
+}
+
+#counter {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(96px, 13vw, 160px);
+  color: var(--accent); line-height: 1;
+  margin-bottom: 20px;
+  opacity: 0; transform: translateY(32px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+#counter.vis { opacity: 1; transform: translateY(0); }
+
+#hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(44px, 6.5vw, 88px);
+  font-weight: 500; line-height: 1.1;
+  margin-bottom: 20px;
+  opacity: 0; transform: translateY(32px);
+  transition: opacity .7s .15s ease, transform .7s .15s ease;
+}
+#hero-title.vis { opacity: 1; transform: translateY(0); }
+
+#hero-sub {
+  font-size: clamp(14px, 1.4vw, 18px);
+  color: var(--dim); max-width: 560px; margin: 0 auto 0;
+  opacity: 0; transform: translateY(32px);
+  transition: opacity .7s .3s ease, transform .7s .3s ease;
+}
+#hero-sub.vis { opacity: 1; transform: translateY(0); }
+
+#hero-scroll {
+  position: absolute; bottom: 40px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  cursor: none; opacity: 0;
+  transition: opacity .7s .5s ease;
+}
+#hero-scroll.vis { opacity: 1; }
+.hs-text { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); }
+.hs-arrow { color: var(--accent); font-size: 22px; animation: bounce 2s ease infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(9px)} }
+
+/* ====== GALLERY ====== */
+#gallery-section {
+  position: relative; height: 100vh; overflow: hidden;
+}
+
+#gallery-hint {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10; text-align: center;
+  pointer-events: none; opacity: 0;
+  transition: opacity .5s;
+  font-size: 12px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--dim);
+}
+#gallery-hint.vis { opacity: 1; }
+
+#gallery-track {
+  position: absolute; top: 0; left: 0;
+  height: 100%;
+  display: flex; align-items: center;
+  width: max-content; /* crucial for offsetWidth measurement */
+  padding: 0 80px;
+  will-change: transform;
+}
+
+/* Exhibit number ghost */
+.ex-num {
+  font-family: 'Courier New', monospace;
+  font-size: clamp(100px, 14vw, 190px);
+  color: transparent;
+  -webkit-text-stroke: 1px var(--border);
+  line-height: 1; user-select: none;
+  padding: 0 24px; flex-shrink: 0;
+  letter-spacing: -.02em;
+}
+
+/* Project card */
+.p-card {
+  position: relative; flex-shrink: 0;
+  overflow: hidden; cursor: none;
+  border: 1px solid var(--border);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025);
+  transition: transform .55s cubic-bezier(.16,1,.3,1),
+              opacity .4s ease;
+}
+.p-card.wide   { width: clamp(380px, 44vw, 560px); height: 70vh; }
+.p-card.medium { width: clamp(300px, 36vw, 460px); height: 60vh; }
+.p-card.narrow { width: clamp(240px, 28vw, 360px); height: 50vh; }
+
+.p-card:hover { transform: scale(1.04); z-index: 10; }
+
+/* dim siblings on hover */
+#gallery-track:has(.p-card:hover) .p-card:not(:hover) { opacity: .35; }
+
+.c-thumb {
+  position: absolute; inset: 0;
+  transition: transform .6s ease;
+}
+.p-card:hover .c-thumb { transform: scale(1.04); }
+
+/* Fake UI content inside thumbnail */
+.c-thumb-inner {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px; padding: 32px; overflow: hidden;
+}
+.c-fake-header {
+  display: flex; align-items: center; gap: 6px;
+  opacity: .35; align-self: flex-start;
+}
+.c-fake-dot { width: 8px; height: 8px; border-radius: 50%; }
+.c-fake-bar-wrap { display: flex; flex-direction: column; gap: 7px; width: 72%; opacity: .3; align-self: flex-start; }
+.c-fake-bar { height: 3px; border-radius: 2px; }
+.c-fake-hero {
+  width: 80%; height: 2px; border-radius: 2px; opacity: .5;
+}
+.c-fake-label {
+  font-size: 11px; letter-spacing: .18em; opacity: .45;
+  text-transform: uppercase; font-weight: 500; align-self: center;
+}
+.c-fake-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  width: 80%; opacity: .2;
+}
+.c-fake-block { height: 30px; border-radius: 3px; }
+
+/* Spotlight */
+.c-spot {
+  position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: radial-gradient(ellipse at 50% 20%, rgba(200,169,110,.18) 0%, transparent 68%);
+  opacity: 0; transition: opacity .4s;
+}
+.p-card:hover .c-spot { opacity: 1; }
+
+/* Overlay gradient */
+.c-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 55%;
+  background: linear-gradient(transparent, rgba(12,12,12,.92));
+  z-index: 3;
+}
+
+/* Museum label */
+.c-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 18px 22px; z-index: 4;
+}
+.c-label-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 7px;
+}
+.c-num, .c-year {
+  font-family: 'Courier New', monospace;
+  font-size: 11px; color: var(--accent); letter-spacing: .14em;
+}
+.c-rule { width: 100%; height: 1px; background: rgba(42,42,42,.7); margin-bottom: 9px; }
+.c-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 500; margin-bottom: 3px; }
+.c-cat { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+.c-desc {
+  font-size: 13px; color: var(--dim); margin-top: 9px;
+  max-height: 0; overflow: hidden; opacity: 0;
+  transition: max-height .4s ease, opacity .4s ease;
+}
+.p-card:hover .c-desc { max-height: 58px; opacity: 1; }
+
+/* Add-card */
+.add-card {
+  position: relative; flex-shrink: 0;
+  width: clamp(260px, 32vw, 400px); height: 60vh;
+  border: 1px dashed var(--border);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; cursor: none;
+  transition: border-color .4s, box-shadow .4s;
+}
+.add-card:hover { border-color: var(--accent); box-shadow: 0 0 48px rgba(200,169,110,.08); }
+.add-plus { font-size: 52px; color: var(--accent); font-weight: 300; line-height: 1; }
+.add-title { font-family: 'Playfair Display', serif; font-size: 22px; text-align: center; }
+.add-sub { font-size: 13px; color: var(--dim); text-align: center; }
+
+/* Gallery progress */
+#gallery-progress {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 1px; background: var(--border); z-index: 20;
+}
+#progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width .12s; }
+#progress-count {
+  position: absolute; right: 48px; bottom: 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px; color: var(--dim); letter-spacing: .1em;
+}
+
+/* ====== CURATOR ====== */
+#curator {
+  max-width: 1380px; margin: 0 auto;
+  padding: 130px 80px;
+  display: grid; grid-template-columns: 1fr 420px; gap: 80px;
+  align-items: center;
+}
+.curator-left { position: relative; padding-left: 30px; }
+.curator-line {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 2px; background: var(--accent);
+}
+.curator-quote {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3vw, 50px);
+  font-weight: 400; font-style: italic;
+  line-height: 1.35; color: var(--text);
+  margin-bottom: 36px;
+}
+.curator-text { font-size: 15px; color: var(--dim); line-height: 1.85; }
+.curator-text p + p { margin-top: 14px; }
+
+.museum-tag {
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 36px 32px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+}
+.museum-tag-title {
+  font-size: 13px; color: var(--accent);
+  letter-spacing: .18em; text-transform: uppercase; margin-bottom: 6px;
+}
+.museum-tag hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+.museum-tag-row { display: flex; justify-content: space-between; padding: 3px 0; }
+.museum-tag-k { color: var(--dim); }
+.museum-tag-v { color: var(--text); }
+
+/* ====== CTA ====== */
+#cta {
+  position: relative; min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+#cta-bg {
+  position: absolute; inset: 0;
+  display: grid;
+  grid-template-columns: repeat(5,1fr);
+  grid-template-rows: repeat(4,1fr);
+  gap: 3px;
+}
+.cta-bg-cell { border-radius: 2px; }
+.cta-ov { position: absolute; inset: 0; background: rgba(12,12,12,.76); }
+.cta-inner {
+  position: relative; z-index: 2;
+  text-align: center; width: 100%; max-width: 680px; padding: 0 24px;
+}
+.cta-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 5vw, 68px); font-weight: 500;
+  line-height: 1.2; margin-bottom: 56px;
+}
+.cta-form { display: flex; flex-direction: column; gap: 32px; margin-bottom: 44px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.f-field { position: relative; }
+.f-field input {
+  width: 100%; background: transparent;
+  border: none; border-bottom: 1px solid var(--border);
+  color: var(--text); font-family: 'Inter', sans-serif;
+  font-size: 15px; padding: 12px 0; outline: none;
+  transition: border-color .3s;
+}
+.f-field input::placeholder { color: var(--dim); }
+.f-field::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; width: 0; height: 1px;
+  background: var(--accent); transition: width .35s ease;
+}
+.f-field:focus-within::after { width: 100%; }
+
+.cta-btn {
+  position: relative; align-self: center;
+  padding: 18px 52px;
+  background: transparent; border: 1px solid var(--accent);
+  color: var(--accent); font-family: 'Inter', sans-serif;
+  font-size: 13px; letter-spacing: .2em; text-transform: uppercase;
+  cursor: none; overflow: hidden; transition: color .4s;
+}
+.cta-btn::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--accent); transform: translateX(-100%);
+  transition: transform .45s cubic-bezier(.16,1,.3,1);
+}
+.cta-btn:hover::before { transform: translateX(0); }
+.cta-btn:hover { color: var(--bg); }
+.cta-btn span { position: relative; z-index: 1; }
+
+.cta-links {
+  font-size: 13px; color: var(--dim);
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+}
+.cta-links a {
+  color: var(--text); text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 2px; transition: border-color .3s, color .3s;
+}
+.cta-links a:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ====== FOOTER ====== */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-logo { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--dim); }
+.footer-logo em { color: var(--accent); font-style: normal; }
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { font-size: 12px; color: var(--dim); text-decoration: none; transition: color .3s; }
+.footer-links a:hover { color: var(--text); }
+.footer-copy { font-size: 12px; color: rgba(245,245,240,.25); }
+
+/* ====== MODAL ====== */
+#modal-ov {
+  position: fixed; inset: 0;
+  background: rgba(12,12,12,.82); backdrop-filter: blur(14px);
+  z-index: 500; opacity: 0; pointer-events: none;
+  transition: opacity .45s;
+}
+#modal-ov.open { opacity: 1; pointer-events: all; }
+
+#modal {
+  position: fixed; top: 5%; left: 5%; right: 5%; bottom: 5%;
+  background: var(--card); border: 1px solid var(--border);
+  z-index: 501; display: grid; grid-template-columns: 60% 40%;
+  overflow: hidden;
+  transform: scale(.93) translateY(16px);
+  opacity: 0; transition: transform .55s cubic-bezier(.16,1,.3,1), opacity .4s;
+}
+#modal.open { transform: scale(1) translateY(0); opacity: 1; }
+
+#modal-media { position: relative; overflow: hidden; }
+#modal-thumb { position: absolute; inset: 0; }
+#modal-thumb-inner {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px; padding: 40px;
+}
+.modal-open-link {
+  position: absolute; bottom: 32px; left: 32px;
+  padding: 13px 26px; background: var(--accent); color: var(--bg);
+  font-size: 12px; letter-spacing: .15em; text-transform: uppercase;
+  text-decoration: none; font-weight: 500; z-index: 2;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: opacity .3s;
+}
+.modal-open-link:hover { opacity: .85; }
+
+#modal-info {
+  padding: 44px 36px; overflow-y: auto;
+  display: flex; flex-direction: column;
+}
+.modal-meta {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 18px;
+}
+.modal-num, .modal-yr {
+  font-family: 'Courier New', monospace;
+  font-size: 12px; color: var(--accent); letter-spacing: .14em;
+}
+.modal-meta-line { flex: 1; height: 1px; background: var(--border); }
+.modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(24px, 2.4vw, 38px); font-weight: 500;
+  margin-bottom: 6px;
+}
+.modal-cat {
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--dim); margin-bottom: 28px;
+}
+.modal-hr { width: 100%; height: 1px; background: var(--border); margin: 20px 0; }
+.modal-s-title {
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 10px;
+}
+.modal-s-text { font-size: 14px; color: var(--dim); line-height: 1.75; }
+.modal-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.modal-list li {
+  font-size: 14px; color: var(--dim);
+  padding-left: 18px; position: relative;
+}
+.modal-list li::before { content: '·'; position: absolute; left: 0; color: var(--accent); }
+.modal-result {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-style: italic; color: var(--text);
+}
+.modal-want-btn {
+  margin-top: 32px; padding: 16px 32px;
+  background: var(--accent); color: var(--bg); border: none;
+  font-family: 'Inter', sans-serif; font-size: 13px;
+  letter-spacing: .16em; text-transform: uppercase;
+  cursor: none; font-weight: 500;
+  transition: opacity .3s; text-align: center; display: block; width: 100%;
+}
+.modal-want-btn:hover { opacity: .85; }
+#modal-close {
+  position: absolute; top: 20px; right: 20px; z-index: 10;
+  width: 38px; height: 38px; border: 1px solid var(--border);
+  background: var(--card); color: var(--dim);
+  font-size: 22px; cursor: none; display: flex;
+  align-items: center; justify-content: center;
+  transition: border-color .3s, color .3s;
+}
+#modal-close:hover { border-color: var(--text); color: var(--text); }
+
+/* ====== FADE-UP SECTIONS ====== */
+.fade-up {
+  opacity: 0; transform: translateY(48px);
+  transition: opacity .9s ease, transform .9s ease;
+}
+.fade-up.vis { opacity: 1; transform: translateY(0); }
+
+/* ====== MOBILE ====== */
+@media (max-width: 768px) {
+  body { cursor: auto; }
+  #cur-dot, #cur-ring { display: none; }
+
+  #navbar { padding: 14px 20px; }
+  .nav-right { gap: 14px; }
+  .nav-cta { display: none; }
+
+  #gallery-section { height: auto; overflow: visible; }
+  #gallery-track {
+    position: static; width: 100%;
+    flex-direction: column; padding: 40px 20px;
+    align-items: stretch; gap: 20px;
+  }
+  .p-card.wide, .p-card.medium, .p-card.narrow { width: 100%; height: 65vw; }
+  .ex-num { display: none; }
+  .add-card { width: 100%; height: 50vw; }
+
+  #curator { grid-template-columns: 1fr; padding: 60px 24px; gap: 36px; }
+  .form-row { grid-template-columns: 1fr; }
+  footer { flex-direction: column; gap: 14px; text-align: center; }
+  #modal { grid-template-columns: 1fr; grid-template-rows: 42vh auto; top: 2%; left: 2%; right: 2%; bottom: 2%; }
+  #modal-info { overflow-y: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- Preloader -->
+<div id="preloader">
+  <div class="pre-panel left"></div>
+  <div class="pre-panel right"></div>
+</div>
+
+<!-- Cursor -->
+<div id="cur-dot"></div>
+<div id="cur-ring">ОТКРЫТЬ</div>
+
+<!-- Navbar -->
+<nav id="navbar">
+  <div class="nav-logo"><em>КЛЕРК</em> / СПЕЦПРОЕКТЫ</div>
+<div class="nav-right"></div>
+  </div>>
+    <span class="nav-count">47 проектов</span>
+    <a href="#cta" class="nav-cta">Обсудить проект</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div id="hero-bg"></div>
+  <div class="hero-content">
+    <div id="counter">0</div>
+    <h1 id="hero-title">Спецпроекты<br>для бизнеса</h1>
+    <p id="hero-sub">Лендинги под каждый бренд — со своей механикой, дизайном и анимациями</p>
+  </div>
+  <div id="hero-scroll">
+    <span class="hs-text">войти в галерею</span>
+    <span class="hs-arrow">↓</span>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section id="gallery-section">
+  <div id="gallery-hint">← прокрутите для просмотра →</div>
+  <div id="gallery-track"></div>
+  <div id="gallery-progress"><div id="progress-bar"></div></div>
+  <div id="progress-count">01 / 08</div>
+</section>
+
+<!-- Curator -->
+<section id="curator" class="fade-up">
+  <div class="curator-left">
+    <div class="curator-line"></div>
+    <blockquote class="curator-quote">
+      "Мы делаем не баннеры. Мы делаем опыт, который читатель проходит, а не пролистывает."
+    </blockquote>
+    <div class="curator-text">
+      <p>Клерк — деловое медиа с аудиторией более 4 миллионов предпринимателей, бухгалтеров и руководителей. Это не просто читатели — это люди, принимающие решения.</p>
+      <p>Спецпроекты — наш формат работы с брендами, которые хотят говорить с этой аудиторией не как рекламодатели, а как партнёры. Каждый проект — отдельная история, отдельный дизайн, отдельная механика.</p>
+    </div>
+  </div>
+  <div>
+    <div class="museum-tag">
+      <div class="museum-tag-title">Клерк Спецпроекты</div>
+      <hr>
+      <div class="museum-tag-row"><span class="museum-tag-k">Основан:</span><span class="museum-tag-v">2019</span></div>
+      <div class="museum-tag-row"><span class="museum-tag-k">Проектов:</span><span class="museum-tag-v">47</span></div>
+      <div class="museum-tag-row"><span class="museum-tag-k">Аудитория:</span><span class="museum-tag-v">4 млн</span></div>
+      <div class="museum-tag-row"><span class="museum-tag-k">Формат:</span><span class="museum-tag-v">Digital</span></div>
+      <div class="museum-tag-row"><span class="museum-tag-k">Тип:</span><span class="museum-tag-v">Спецпроекты</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div id="cta-bg"></div>
+  <div class="cta-ov"></div>
+  <div class="cta-inner fade-up">
+    <h2 class="cta-title">Создадим проект<br>для вас</h2>
+    <form class="cta-form" id="cta-form">
+      <div class="form-row">
+        <div class="f-field"><input type="text" placeholder="Имя"></div>
+        <div class="f-field"><input type="text" placeholder="Компания"></div>
+        <div class="f-field"><input type="email" placeholder="Почта"></div>
+      </div>
+      <button type="submit" class="cta-btn"><span>Обсудить →</span></button>
+    </form>
+    <div class="cta-links">
+      <span>или напишите напрямую:</span>
+      <a href="#">Telegram</a>
+      <span>·</span>
+      <a href="#">Почта</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo"><em>КЛЕРК</em> / СПЕЦПРОЕКТЫ</div>
+  <div class="footer-links">
+    <a href="#">О проекте</a>
+    <a href="#">Портфолио</a>
+    <a href="#">Контакты</a>
+  </div>
+  <div class="footer-copy">© 2024 Клерк.ру</div>
+</footer>
+
+<!-- Modal -->
+<div id="modal-ov">
+  <div id="modal">
+    <div id="modal-media">
+      <div id="modal-thumb"><div id="modal-thumb-inner"></div></div>
+      <a href="#" id="modal-link" class="modal-open-link" target="_blank">Открыть проект ↗</a>
+    </div>
+    <div id="modal-info">
+      <div class="modal-meta">
+        <span class="modal-num" id="m-num">01</span>
+        <div class="modal-meta-line"></div>
+        <span class="modal-yr" id="m-year">2024</span>
+      </div>
+      <h2 class="modal-title" id="m-title"></h2>
+      <div class="modal-cat" id="m-cat"></div>
+      <div class="modal-hr"></div>
+      <div class="modal-s-title">Задача</div>
+      <p class="modal-s-text" id="m-task"></p>
+      <div class="modal-hr"></div>
+      <div class="modal-s-title">Что сделали</div>
+      <ul class="modal-list" id="m-done"></ul>
+      <div class="modal-hr"></div>
+      <div class="modal-s-title">Результат</div>
+      <p class="modal-result" id="m-result"></p>
+      <button class="modal-want-btn" id="m-want">Хочу такой же →</button>
+    </div>
+    <button id="modal-close">×</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script>
+/* ====== DATA ====== */
+const PROJECTS = [
+  {
+    num:'01', year:'2024', size:'wide',
+    title:'Альфа-Банк: Депозитный калькулятор',
+    cat:'Банки · Лендинг + Калькулятор',
+    short:'Лендинг с интерактивным калькулятором. 18 000 прохождений.',
+    task:'Привлечь новых вкладчиков через образовательный интерактивный формат с понятной механикой расчёта доходности.',
+    done:['Кастомный калькулятор доходности с анимацией','Адаптивная инфографика по ставкам','A/B тест двух версий лендинга'],
+    result:'18 000 прохождений за 2 недели запуска',
+    bg:'linear-gradient(140deg,#0d1c40 0%,#1a3470 55%,#0a1428 100%)',
+    ac:'#4a7de8'
+  },
+  {
+    num:'02', year:'2024', size:'narrow',
+    title:'Сбер: Малый бизнес',
+    cat:'Банки · Тест + Спецпроект',
+    short:'Интерактивный тест для владельцев бизнеса. 24 000 прохождений.',
+    task:'Познакомить аудиторию малого бизнеса с продуктовой линейкой через формат самодиагностики.',
+    done:['Тест из 12 вопросов с персонализированным результатом','Интеграция с CRM','Нативная история на главной'],
+    result:'24 000 прохождений, конверсия 8.3%',
+    bg:'linear-gradient(140deg,#18052a 0%,#2e1b60 55%,#18052a 100%)',
+    ac:'#8a4fd6'
+  },
+  {
+    num:'03', year:'2023', size:'medium',
+    title:'Самолёт: Жилые кварталы',
+    cat:'Недвижимость · Лендинг',
+    short:'Лендинг квартала с интерактивным туром. 31 000 просмотров.',
+    task:'Показать преимущества жилого комплекса аудитории Клерка, интересующейся покупкой жилья.',
+    done:['Параллакс-история с объёмными элементами','Интерактивный тур по инфраструктуре','Калькулятор ипотеки'],
+    result:'31 000 просмотров, 1 200 заявок',
+    bg:'linear-gradient(150deg,#091526 0%,#1a3d6b 60%,#0c2035 100%)',
+    ac:'#3a7fd5'
+  },
+  {
+    num:'04', year:'2024', size:'wide',
+    title:'Тинькофф: Бизнес-карта',
+    cat:'Финтех · Лендинг + Игра',
+    short:'Геймифицированный лендинг продукта. 42 000 вовлечений.',
+    task:'Объяснить выгоды бизнес-карты через игровую механику, где пользователь видит экономию в реальном времени.',
+    done:['Игровой симулятор расходов бизнеса','Анимированная инфографика кешбэка','Персонализированный итоговый отчёт'],
+    result:'42 000 вовлечений, CPC −34% vs стандартной рекламы',
+    bg:'linear-gradient(140deg,#1a1500 0%,#332a00 50%,#1a1000 100%)',
+    ac:'#e8c020'
+  },
+  {
+    num:'05', year:'2023', size:'medium',
+    title:'Ингосстрах: Страхование бизнеса',
+    cat:'Страхование · Тест + Лендинг',
+    short:'Диагностика рисков для бизнеса. 15 000 прохождений.',
+    task:'Помочь предпринимателям осознать риски своего бизнеса и предложить подходящие страховые продукты.',
+    done:['Тест-диагностика из 8 сценариев','Персонализированный отчёт по рискам','Калькулятор стоимости полиса'],
+    result:'15 000 прохождений, 890 заявок',
+    bg:'linear-gradient(140deg,#081e1e 0%,#0f3535 55%,#081e1e 100%)',
+    ac:'#2ab0bc'
+  },
+  {
+    num:'06', year:'2024', size:'narrow',
+    title:'Ozon: Продавцам',
+    cat:'E-commerce · Лендинг + Гайд',
+    short:'Интерактивный гайд для новых продавцов. 55 000 просмотров.',
+    task:'Привлечь новых продавцов на платформу через образовательный спецпроект с пошаговым гайдом.',
+    done:['Интерактивный пошаговый гайд','Калькулятор прибыли на маркетплейсе','Истории успешных продавцов'],
+    result:'55 000 просмотров, 3 400 регистраций',
+    bg:'linear-gradient(140deg,#00153a 0%,#003380 55%,#001030 100%)',
+    ac:'#0066ff'
+  },
+  {
+    num:'07', year:'2023', size:'wide',
+    title:'1С: Автоматизация учёта',
+    cat:'B2B Software · Лендинг',
+    short:'Образовательный лендинг о переходе на 1С. 22 000 просмотров.',
+    task:'Объяснить сложный продукт простым языком и показать ROI от внедрения автоматизации.',
+    done:['Интерактивная схема бизнес-процессов','Калькулятор экономии времени','Сравнение «до / после» внедрения'],
+    result:'22 000 просмотров, 1 100 заявок на демо',
+    bg:'linear-gradient(140deg,#0f0c1f 0%,#1c1840 55%,#0a0818 100%)',
+    ac:'#e8500a'
+  },
+  {
+    num:'08', year:'2024', size:'medium',
+    title:'ВТБ: Корпоративное финансирование',
+    cat:'Банки · Лендинг + Форма',
+    short:'Статусный лендинг для среднего бизнеса. 12 000 просмотров.',
+    task:'Привлечь руководителей среднего бизнеса к продуктам корпоративного финансирования ВТБ.',
+    done:['Статусный дизайн под аудиторию СМБ','Калькулятор кредитной нагрузки','Квалифицирующая форма заявки'],
+    result:'12 000 просмотров, средний чек лидов — 50 млн ₽',
+    bg:'linear-gradient(140deg,#001525 0%,#003060 55%,#001020 100%)',
+    ac:'#0077cc'
+  }
+];
+
+/* ====== CURSOR ====== */
+const curDot  = document.getElementById('cur-dot');
+const curRing = document.getElementById('cur-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+document.addEventListener('mouseleave', () => { curDot.style.opacity = '0'; curRing.style.opacity = '0'; });
+document.addEventListener('mouseenter', () => { curDot.style.opacity = '1'; curRing.style.opacity = '1'; });
+
+(function animCursor() {
+  curDot.style.left  = mx + 'px';
+  curDot.style.top   = my + 'px';
+  rx += (mx - rx) * .11;
+  ry += (my - ry) * .11;
+  curRing.style.left = rx + 'px';
+  curRing.style.top  = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+
+function setCursorCard(on)  { curRing.classList.toggle('card', on);  curRing.classList.remove('link'); }
+function setCursorLink(on)  { curRing.classList.toggle('link', on);  curRing.classList.remove('card'); }
+function resetCursor()      { curRing.classList.remove('card','link'); }
+
+document.querySelectorAll('a,button,.nav-cta').forEach(el => {
+  el.addEventListener('mouseenter', () => setCursorLink(true));
+  el.addEventListener('mouseleave', () => resetCursor());
+});
+
+/* ====== COUNTER ====== */
+function countUp(el, to, dur) {
+  const t0 = performance.now();
+  (function loop(now) {
+    const p = Math.min((now-t0)/dur, 1);
+    const e = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.round(to * e);
+    if (p < 1) requestAnimationFrame(loop);
+  })(t0);
+}
+
+/* ====== BUILD HERO BG ====== */
+function buildHeroBg() {
+  const bg = document.getElementById('hero-bg');
+  const shades = ['#161616','#141414','#191919','#111111','#181818','#131313'];
+  for (let i = 0; i < 28; i++) {
+    const c = document.createElement('div');
+    c.className = 'bg-cell';
+    c.style.background = shades[i % shades.length];
+    bg.appendChild(c);
+  }
+}
+
+/* ====== BUILD CTA BG ====== */
+function buildCtaBg() {
+  const bg = document.getElementById('cta-bg');
+  for (let i = 0; i < 20; i++) {
+    const c = document.createElement('div');
+    c.className = 'cta-bg-cell';
+    c.style.background = PROJECTS[i % PROJECTS.length].bg;
+    bg.appendChild(c);
+  }
+}
+
+/* ====== BUILD GALLERY ====== */
+function buildGallery() {
+  const track = document.getElementById('gallery-track');
+
+  PROJECTS.forEach((p, i) => {
+    // Ghost exhibit number
+    const xn = document.createElement('div');
+    xn.className = 'ex-num';
+    xn.textContent = p.num;
+    track.appendChild(xn);
+
+    // Card
+    const card = document.createElement('div');
+    card.className = `p-card ${p.size}`;
+
+    // Thumbnail
+    const thumb = document.createElement('div');
+    thumb.className = 'c-thumb';
+    thumb.style.background = p.bg;
+
+    // Fake UI art
+    const inner = document.createElement('div');
+    inner.className = 'c-thumb-inner';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'c-fake-header';
+    ['#e55','#fa0','#5c5'].forEach(col => {
+      const d = document.createElement('div');
+      d.className = 'c-fake-dot';
+      d.style.background = col;
+      hdr.appendChild(d);
+    });
+
+    const lbl = document.createElement('div');
+    lbl.className = 'c-fake-label';
+    lbl.style.color = p.ac;
+    lbl.textContent = p.cat.split('·')[0].trim();
+
+    const bars = document.createElement('div');
+    bars.className = 'c-fake-bar-wrap';
+    [90, 70, 55, 80].forEach((w, j) => {
+      const b = document.createElement('div');
+      b.className = 'c-fake-bar';
+      b.style.cssText = `width:${w}%; background:${p.ac};`;
+      bars.appendChild(b);
+    });
+
+    const grid = document.createElement('div');
+    grid.className = 'c-fake-grid';
+    for (let j = 0; j < 4; j++) {
+      const bl = document.createElement('div');
+      bl.className = 'c-fake-block';
+      bl.style.background = j % 2 === 0 ? p.ac : 'rgba(255,255,255,.06)';
+      grid.appendChild(bl);
+    }
+
+    inner.appendChild(hdr);
+    inner.appendChild(lbl);
+    inner.appendChild(bars);
+    inner.appendChild(grid);
+    thumb.appendChild(inner);
+
+    const spot    = document.createElement('div'); spot.className = 'c-spot';
+    const overlay = document.createElement('div'); overlay.className = 'c-overlay';
+
+    const label = document.createElement('div');
+    label.className = 'c-label';
+    label.innerHTML = `
+      <div class="c-label-head">
+        <span class="c-num">${p.num}</span>
+        <span class="c-year">${p.year}</span>
+      </div>
+      <div class="c-rule"></div>
+      <div class="c-title">${p.title}</div>
+      <div class="c-cat">${p.cat}</div>
+      <div class="c-desc">${p.short}</div>
+    `;
+
+    card.appendChild(thumb);
+    card.appendChild(spot);
+    card.appendChild(overlay);
+    card.appendChild(label);
+
+    card.addEventListener('mouseenter', () => setCursorCard(true));
+    card.addEventListener('mouseleave', () => resetCursor());
+    card.addEventListener('click', () => openModal(i));
+
+    track.appendChild(card);
+  });
+
+  // Last ghost number
+  const lastXn = document.createElement('div');
+  lastXn.className = 'ex-num';
+  lastXn.textContent = '09';
+  track.appendChild(lastXn);
+
+  // Add-card
+  const add = document.createElement('div');
+  add.className = 'add-card';
+  add.innerHTML = `<div class="add-plus">+</div><div class="add-title">Новый проект</div><div class="add-sub">Ваш мог бы быть здесь</div>`;
+  add.addEventListener('click', () => document.getElementById('cta').scrollIntoView({ behavior:'smooth' }));
+  add.addEventListener('mouseenter', () => setCursorCard(true));
+  add.addEventListener('mouseleave', () => resetCursor());
+  track.appendChild(add);
+
+  // End padding spacer
+  const end = document.createElement('div');
+  end.style.cssText = 'width:80px; flex-shrink:0;';
+  track.appendChild(end);
+}
+
+/* ====== MODAL ====== */
+function openModal(i) {
+  const p = PROJECTS[i];
+  document.getElementById('modal-thumb').style.background = p.bg;
+
+  // Thumb art
+  const ti = document.getElementById('modal-thumb-inner');
+  ti.innerHTML = '';
+  ti.style.cssText = `
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:20px;padding:40px;
+  `;
+  const lbl2 = document.createElement('div');
+  lbl2.style.cssText = `font-size:13px;letter-spacing:.18em;color:${p.ac};opacity:.5;text-transform:uppercase;`;
+  lbl2.textContent = p.cat.split('·')[0].trim();
+  const bars2 = document.createElement('div');
+  bars2.style.cssText = `display:flex;flex-direction:column;gap:9px;width:65%;opacity:.25;`;
+  [85,65,50,75,40].forEach(w => {
+    const b = document.createElement('div');
+    b.style.cssText = `height:4px;border-radius:2px;background:${p.ac};width:${w}%;`;
+    bars2.appendChild(b);
+  });
+  ti.appendChild(lbl2); ti.appendChild(bars2);
+
+  document.getElementById('m-num').textContent   = p.num;
+  document.getElementById('m-year').textContent  = p.year;
+  document.getElementById('m-title').textContent = p.title;
+  document.getElementById('m-cat').textContent   = p.cat;
+  document.getElementById('m-task').textContent  = p.task;
+  document.getElementById('m-result').textContent = p.result;
+
+  const dl = document.getElementById('m-done');
+  dl.innerHTML = '';
+  p.done.forEach(d => { const li = document.createElement('li'); li.textContent = d; dl.appendChild(li); });
+
+  document.getElementById('modal-ov').classList.add('open');
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-ov').classList.remove('open');
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-ov').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-ov')) closeModal();
+});
+document.getElementById('m-want').addEventListener('click', () => {
+  closeModal();
+  document.getElementById('cta').scrollIntoView({ behavior:'smooth' });
+});
+
+/* ====== GSAP HORIZONTAL GALLERY ====== */
+function initGallery() {
+  if (window.innerWidth <= 768) return;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const section  = document.getElementById('gallery-section');
+  const track    = document.getElementById('gallery-track');
+  const hint     = document.getElementById('gallery-hint');
+  const bar      = document.getElementById('progress-bar');
+  const count    = document.getElementById('progress-count');
+
+  const N = PROJECTS.length;
+
+  gsap.to(track, {
+    x: () => -(track.offsetWidth - window.innerWidth),
+    ease: 'none',
+    scrollTrigger: {
+      trigger: section,
+      start: 'top top',
+      end: () => '+=' + (track.offsetWidth - window.innerWidth),
+      pin: true,
+      scrub: 1.1,
+      invalidateOnRefresh: true,
+      onEnter: () => {
+        hint.classList.add('vis');
+        setTimeout(() => hint.classList.remove('vis'), 2200);
+      },
+      onUpdate: self => {
+        bar.style.width = (self.progress * 100) + '%';
+        const cur = Math.min(Math.floor(self.progress * N) + 1, N);
+        count.textContent = String(cur).padStart(2,'0') + ' / ' + String(N).padStart(2,'0');
+      }
+    }
+  });
+}
+
+/* ====== FADE-UP OBSERVER ====== */
+function initFadeUp() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: .12 });
+  document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+}
+
+/* ====== HERO PARALLAX ====== */
+function initParallax() {
+  const bg = document.getElementById('hero-bg');
+  window.addEventListener('scroll', () => {
+    const sy = window.scrollY;
+    if (sy < window.innerHeight * 1.5) {
+      bg.style.transform = `scale(1.08) translateY(${sy * .025}px)`;
+    }
+  }, { passive: true });
+}
+
+/* ====== CTA FORM ====== */
+document.getElementById('cta-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const sp = e.target.querySelector('.cta-btn span');
+  sp.textContent = 'Отправлено ✓';
+  setTimeout(() => sp.textContent = 'Обсудить →', 3000);
+});
+
+/* ====== BOOT ====== */
+buildHeroBg();
+buildCtaBg();
+buildGallery();
+
+window.addEventListener('load', () => {
+  // Open preloader doors after short delay
+  setTimeout(() => {
+    document.getElementById('preloader').classList.add('open');
+
+    setTimeout(() => document.getElementById('navbar').classList.add('vis'), 450);
+
+    setTimeout(() => {
+      document.getElementById('hero-bg').classList.add('vis');
+      const cnt = document.getElementById('counter');
+      cnt.classList.add('vis');
+      countUp(cnt, 47, 1500);
+
+      setTimeout(() => document.getElementById('hero-title').classList.add('vis'), 150);
+      setTimeout(() => document.getElementById('hero-sub').classList.add('vis'),   350);
+      setTimeout(() => document.getElementById('hero-scroll').classList.add('vis'), 600);
+    }, 700);
+
+    setTimeout(() => {
+      initGallery();
+      initFadeUp();
+      initParallax();
+    }, 1000);
+  }, 250);
+});
+
+document.getElementById('hero-scroll').addEventListener('click', () => {
+  document.getElementById('gallery-section').scrollIntoView({ behavior:'smooth' });
+});
+</script>
+</body>
+</html>

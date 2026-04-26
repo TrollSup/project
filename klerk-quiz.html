@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Клерк — Подбор курса</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1851E5;--blue-d:#1038B0;--blue-l:#EEF3FF;
+  --orange:#FF6B35;--orange-d:#E55A26;
+  --text:#111827;--muted:#6B7280;--border:#E5E7EB;
+  --bg:#F0F4FF;--white:#fff;--green:#10B981;
+  --r:14px;--shadow:0 8px 40px rgba(24,81,229,.13);
+}
+body{
+  font-family:'Inter',-apple-system,sans-serif;
+  background:var(--bg);min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;
+  padding:28px 16px 56px;
+}
+/* dots bg */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(circle,#c7d7ff 1px,transparent 1px);
+  background-size:28px 28px;opacity:.45;pointer-events:none;z-index:0;
+}
+
+/* HEADER */
+.hdr{
+  width:100%;max-width:640px;display:flex;
+  align-items:center;margin-bottom:28px;position:relative;z-index:1;
+}
+.logo{font-size:21px;font-weight:800;color:var(--blue);letter-spacing:-.5px}
+.logo b{color:var(--orange)}
+.hdr-tag{
+  margin-left:auto;font-size:12px;color:var(--muted);
+  background:var(--white);border:1px solid var(--border);
+  padding:4px 10px;border-radius:99px;font-weight:500;
+}
+
+/* CARD */
+.card{
+  background:var(--white);border-radius:20px;
+  box-shadow:var(--shadow);width:100%;max-width:640px;
+  padding:40px;position:relative;z-index:1;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--blue),#60A5FA,var(--orange));
+}
+
+/* PROGRESS */
+.prog{margin-bottom:28px}
+.prog-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.prog-lbl{font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.8px;text-transform:uppercase}
+.prog-pct{font-size:11px;color:var(--muted);font-weight:600}
+.prog-track{height:5px;background:var(--border);border-radius:99px;overflow:hidden}
+.prog-fill{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--blue),#60A5FA);
+  transition:width .45s cubic-bezier(.4,0,.2,1);
+}
+
+/* SCREEN ANIMATION */
+.screen{animation:slideIn .32s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+
+/* START */
+.start{text-align:center;padding:8px 0}
+.start-emoji{font-size:52px;margin-bottom:18px;display:block}
+.start-h{font-size:26px;font-weight:800;color:var(--text);line-height:1.25;letter-spacing:-.5px;margin-bottom:12px}
+.start-sub{font-size:15px;color:var(--muted);line-height:1.6;margin-bottom:32px}
+.start-pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:36px}
+.pill{
+  display:flex;align-items:center;gap:6px;
+  background:#F9FAFB;border:1px solid var(--border);
+  font-size:12px;font-weight:600;color:var(--muted);
+  padding:6px 13px;border-radius:99px;
+}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.btn-start{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--blue);color:#fff;border:none;
+  border-radius:var(--r);font-size:16px;font-weight:700;
+  font-family:inherit;padding:17px 40px;cursor:pointer;
+  transition:all .2s ease;
+}
+.btn-start:hover{background:var(--blue-d);transform:translateY(-2px);box-shadow:0 6px 24px rgba(24,81,229,.35)}
+
+/* QUESTION */
+.q-text{font-size:20px;font-weight:700;color:var(--text);line-height:1.35;margin-bottom:22px}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{
+  display:flex;align-items:center;gap:13px;
+  padding:13px 17px;border:1.5px solid var(--border);
+  border-radius:12px;cursor:pointer;background:var(--white);
+  text-align:left;width:100%;font-family:inherit;
+  transition:all .17s ease;
+}
+.opt:hover{border-color:var(--blue);background:var(--blue-l);transform:translateX(4px)}
+.opt:active{transform:translateX(4px) scale(.99)}
+.opt-idx{
+  width:26px;height:26px;border-radius:8px;
+  background:#F3F4F6;color:var(--muted);
+  font-size:12px;font-weight:700;display:flex;
+  align-items:center;justify-content:center;
+  flex-shrink:0;transition:all .17s ease;font-family:inherit;
+}
+.opt:hover .opt-idx{background:var(--blue);color:#fff}
+.opt-txt{font-size:14px;font-weight:500;color:var(--text);line-height:1.4}
+.back-btn{
+  display:flex;align-items:center;gap:5px;
+  background:none;border:none;color:var(--muted);
+  font-size:13px;font-family:inherit;cursor:pointer;
+  padding:0;margin-top:20px;transition:color .15s;
+}
+.back-btn:hover{color:var(--blue)}
+.back-btn:disabled{opacity:.3;cursor:default}
+
+/* RESULT */
+.res-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:#DCFCE7;color:#16A34A;font-size:11px;
+  font-weight:700;padding:5px 11px;border-radius:99px;
+  margin-bottom:18px;letter-spacing:.3px;text-transform:uppercase;
+}
+.res-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px}
+.res-name{font-size:25px;font-weight:800;color:var(--text);line-height:1.2;letter-spacing:-.4px;margin-bottom:12px}
+.res-desc{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:20px}
+.res-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px}
+.res-tag{background:var(--blue-l);color:var(--blue);font-size:12px;font-weight:600;padding:4px 11px;border-radius:99px}
+.divider{height:1px;background:var(--border);margin:0 -40px 24px}
+.why-box{
+  background:#FFFBEB;border-left:3px solid #F59E0B;
+  border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:26px;
+}
+.why-title{font-size:11px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.why-text{font-size:13px;color:#78350F;line-height:1.55}
+.cta{display:flex;flex-direction:column;gap:9px}
+.btn-orange{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--orange);color:#fff;border:none;
+  border-radius:var(--r);font-size:15px;font-weight:700;
+  font-family:inherit;padding:15px 24px;cursor:pointer;
+  transition:all .18s ease;text-decoration:none;
+}
+.btn-orange:hover{background:var(--orange-d);transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,107,53,.35)}
+.btn-outline{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--white);color:var(--blue);
+  border:1.5px solid var(--blue);border-radius:var(--r);
+  font-size:14px;font-weight:600;font-family:inherit;
+  padding:13px 24px;cursor:pointer;transition:all .18s ease;text-decoration:none;
+}
+.btn-outline:hover{background:var(--blue-l)}
+.restart{
+  background:none;border:none;color:var(--muted);font-size:13px;
+  font-family:inherit;cursor:pointer;padding:8px;
+  display:block;width:100%;text-align:center;transition:color .15s;
+}
+.restart:hover{color:var(--text)}
+
+/* CHOICE PAGE */
+.choice-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.choice-card{
+  border:1.5px solid var(--border);border-radius:12px;
+  padding:15px 17px;cursor:pointer;transition:all .17s ease;background:var(--white);
+  text-align:left;width:100%;font-family:inherit;
+}
+.choice-card:hover{border-color:var(--blue);background:var(--blue-l);transform:translateX(4px)}
+.cc-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.cc-desc{font-size:12px;color:var(--muted)}
+
+/* FOOTER */
+.footer{margin-top:20px;font-size:11px;color:var(--muted);text-align:center;position:relative;z-index:1}
+
+/* RESULT COURSE CARD */
+.rcc{
+  display:block;text-decoration:none;
+  border-radius:16px;overflow:hidden;
+  border:1.5px solid var(--border);
+  margin-bottom:24px;
+  transition:transform .2s, box-shadow .2s;
+}
+.rcc:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.12)}
+.rcc-img{
+  height:148px;position:relative;
+  background-size:cover;background-position:center;
+}
+.rcc-overlay{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:14px 16px;
+}
+.rcc-badge{
+  position:absolute;top:12px;left:12px;
+  background:rgba(255,255,255,.22);backdrop-filter:blur(6px);
+  color:#fff;font-size:10px;font-weight:700;
+  padding:3px 9px;border-radius:99px;
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.rcc-name{
+  font-size:16px;font-weight:800;color:#fff;
+  line-height:1.25;text-shadow:0 1px 4px rgba(0,0,0,.35);
+}
+.rcc-foot{
+  padding:12px 16px;background:var(--white);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.rcc-tags{font-size:12px;color:var(--muted)}
+.rcc-go{font-size:12px;font-weight:700;color:var(--blue);white-space:nowrap}
+
+@media(max-width:480px){
+  .card{padding:24px 18px}
+  .q-text{font-size:17px}
+  .res-name{font-size:20px}
+  .divider{margin:0 -18px 20px}
+  .start-h{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="logo">Клерк<b>.</b></div>
+  <div class="hdr-tag">Подбор обучения</div>
+</header>
+
+<div class="card" id="card"></div>
+
+<div class="footer">© 2025 Клерк.ру — онлайн-обучение для бухгалтеров</div>
+
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+
+const Q = {
+  q1:{
+    label:'Вопрос 1 из 4–5',
+    text:'Какой вариант лучше всего описывает вашу ситуацию сейчас?',
+    opts:[
+      {t:'Нет опыта, хочу освоить бухгалтерию с нуля',            next:'q2_a'},
+      {t:'Работаю бухгалтером, хочу углубиться и взять новые участки', next:'q2_b'},
+      {t:'Главный бухгалтер, хочу расширить компетенции',          next:'q2_c'},
+      {t:'Не бухгалтер, но хочу освоить смежную область (кадры, 1С, аналитика)', next:'q2_d'},
+      {t:'Есть базовые знания / работал(а) помощником бухгалтера', next:'q2_e'},
+      {t:'Был длительный перерыв в работе, хочу вернуться',        next:'q2_f'},
+    ]
+  },
+  q2_a:{
+    label:'Вопрос 2',
+    text:'Что вам ближе?',
+    opts:[
+      {t:'Получить профессию бухгалтера с нуля',                      next:'q_prio', r:'buh_nulya'},
+      {t:'Хочу работать кадровиком',                                   next:'q_prio', r:'kadrovik'},
+      {t:'Освоить 1С и далее стать аналитиком',                       next:'q_prio', r:'analitik_1c'},
+      {t:'Пойти в управленческий учёт и финансы',                     next:'q_prio', r:'upravl'},
+      {t:'Вести бухгалтерию для продавцов на маркетплейсах',          next:'q_prio', r:'marketplace'},
+      {t:'Хочу сначала понять, какое направление мне подойдёт',       next:'q_prio', r:'choice'},
+    ]
+  },
+  q2_b:{
+    label:'Вопрос 2',
+    text:'Какой путь вам ближе?',
+    opts:[
+      {t:'Стать самостоятельным бухгалтером полного цикла',           next:'q3_sistema'},
+      {t:'Взять новый участок: зарплата или кадры',                   next:'q3_uchastok'},
+      {t:'Освоить управленческий учёт и финансы',                     next:'q_prio', r:'upravl'},
+      {t:'Научиться работать в 1С как аналитик',                      next:'q_prio', r:'analitik_1c'},
+      {t:'Разобраться в специфике: маркетплейсы / ВЭД / отраслевой учёт', next:'q3_sfera'},
+      {t:'Точечно закрыть много разных вопросов',                     next:'q_prio', r:'premium'},
+    ]
+  },
+  q2_c:{
+    label:'Вопрос 2',
+    text:'Что для вас сейчас актуальнее всего как для главбуха?',
+    opts:[
+      {t:'Освоить современные инструменты: нейросети и Power BI',     next:'q_prio', r:'neuro'},
+      {t:'Разобраться в управленческом учёте и финансах',             next:'q_prio', r:'upravl'},
+      {t:'Вырасти в сторону финансового директора',                   next:'q_prio', r:'findirector'},
+      {t:'Освоить 1С и аналитику глубже',                            next:'q_prio', r:'analitik_1c'},
+      {t:'Разобраться в отраслевой специфике',                        next:'q3_sfera'},
+    ]
+  },
+  q2_d:{
+    label:'Вопрос 2',
+    text:'Какая смежная область вам сейчас ближе?',
+    opts:[
+      {t:'Кадровая работа / кадровый учёт',  next:'q_prio', r:'kadrovik'},
+      {t:'Управленческий учёт',              next:'q_prio', r:'upravl'},
+      {t:'Аналитика в 1С',                  next:'q_prio', r:'analitik_1c'},
+      {t:'Финансовый менеджмент',            next:'q_prio', r:'findirector'},
+    ]
+  },
+  q2_e:{
+    label:'Вопрос 2',
+    text:'Какой результат вы хотите получить от обучения в первую очередь?',
+    opts:[
+      {t:'Получить повышение или новую должность (например, стать главным бухгалтером)', next:'q3_sistema'},
+      {t:'Взять на себя новые участки работы на текущем месте',          next:'q3_uchastok'},
+      {t:'Вести учёт в своей компании / для своих клиентов',            next:'q_prio', r:'glavbuh_usn'},
+      {t:'Решить конкретную проблему (например, разобраться с проверкой)',next:'q_prio', r:'premium'},
+      {t:'Систематизировать разрозненные знания и быть в курсе изменений',next:'q_prio', r:'premium'},
+    ]
+  },
+  q2_f:{
+    label:'Вопрос 2',
+    text:'Как вам было бы комфортнее вернуться?',
+    opts:[
+      {t:'Вспомнить базу и снова почувствовать уверенность',            next:'q_prio', r:'buh_nulya'},
+      {t:'Быстро разобраться, что изменилось в профессии',              next:'q_prio', r:'premium'},
+      {t:'Освоить современные инструменты: автоматизация, нейросети',   next:'q_prio', r:'neuro'},
+      {t:'Выбрать новое направление внутри профессии',                  next:'q_prio', r:'choice'},
+    ]
+  },
+  q3_sistema:{
+    label:'Вопрос 3',
+    text:'С какой системой налогообложения предстоит работать?',
+    opts:[
+      {t:'Малый бизнес: УСН',                 next:'q_prio', r:'glavbuh_usn'},
+      {t:'Средний / крупный бизнес: ОСНО',    next:'q_prio', r:'glavbuh_osno'},
+    ]
+  },
+  q3_uchastok:{
+    label:'Вопрос 3',
+    text:'Какой участок хотите освоить в первую очередь?',
+    opts:[
+      {t:'Бухгалтер по заработной плате',  next:'q_prio', r:'buh_zarplata'},
+      {t:'Кадровик',                        next:'q_prio', r:'kadrovik'},
+    ]
+  },
+  q3_sfera:{
+    label:'Вопрос 3',
+    text:'С какой темой хотите разобраться в первую очередь?',
+    opts:[
+      {t:'Торговля',                          next:'q_prio', r:'torgovlya'},
+      {t:'Строительство',                     next:'q_prio', r:'stroit'},
+      {t:'Маркетплейсы',                      next:'q_prio', r:'marketplace'},
+      {t:'ВЭД (внешнеэкономическая деятельность)', next:'q_prio', r:'ved'},
+      {t:'Малый бизнес: УСН',                 next:'q_prio', r:'glavbuh_usn'},
+      {t:'Средний / крупный бизнес: ОСНО',    next:'q_prio', r:'glavbuh_osno'},
+    ]
+  },
+  q_prio:{
+    label:'Почти готово!',
+    text:'Что для вас особенно важно при выборе обучения?',
+    opts:[
+      {t:'Быстро применить знания в работе',        next:'q_fmt'},
+      {t:'Много практики',                           next:'q_fmt'},
+      {t:'Шаблоны, чек-листы и образцы документов', next:'q_fmt'},
+      {t:'Диплом / удостоверение',                  next:'q_fmt'},
+      {t:'Доступная цена / рассрочка',              next:'q_fmt'},
+    ]
+  },
+  q_fmt:{
+    label:'Последний вопрос',
+    text:'Какой формат обучения вам удобнее всего?',
+    opts:[
+      {t:'Короткие уроки в удобном темпе',                           next:'result'},
+      {t:'По 1–2 часа несколько раз в неделю',                       next:'result'},
+      {t:'Только по выходным',                                        next:'result'},
+      {t:'Максимально гибкий формат, иду в своём темпе',             next:'result'},
+    ]
+  },
+};
+
+const RESULTS = {
+  buh_nulya:   {icon:'📊', name:'Курс «Бухгалтер с нуля»',           tags:['Диплом гособразца','С нуля','4 месяца'],  desc:'Профессиональная переподготовка: от основ бухучёта до самостоятельного ведения учёта. Диплом государственного образца.',  why:'Вам нужна чёткая система с нуля — без пробелов. Этот курс строится именно так: от теории к практике, шаг за шагом.', url:'https://www.klerk.ru/learn/event/50047/'},
+  kadrovik:    {icon:'👥', name:'Курс «Кадровик с нуля»',            tags:['Диплом гособразца','Кадры','Практика'],   desc:'Полный курс по кадровому делопроизводству: трудовые договоры, приказы, отпуска, увольнения и проверки.',               why:'Вы хотите работать с кадрами — курс закрывает всё: от оформления сотрудников до взаимодействия с трудовой инспекцией.', url:'https://www.klerk.ru/learn/event/50840/'},
+  analitik_1c: {icon:'💻', name:'Курс «Аналитик 1С»',               tags:['Диплом гособразца','1С','IT + учёт'],      desc:'Переподготовка на аналитика 1С: настройка, доработка, внедрение и сопровождение систем. Высокий спрос на рынке.',       why:'Аналитик 1С — специальность на пересечении IT и учёта. Растёт в цене каждый год. Судя по вашим ответам — это ваш путь.', url:'https://www.klerk.ru/learn/event/50205/'},
+  upravl:      {icon:'📈', name:'Курс «Управленческий учёт»',        tags:['Удостоверение','Управленческий учёт','Рост'], desc:'Бюджетирование, финансовый анализ, P&L, Cash Flow, отчёты для руководства. Повышение квалификации с удостоверением.',  why:'Управленческий учёт — следующий шаг в карьере. Поможет говорить с собственниками на одном языке и влиять на решения.', url:'https://www.klerk.ru/learn/event/49340/'},
+  findirector: {icon:'💼', name:'Курс «Финансовый менеджмент»',      tags:['Диплом гособразца','Финансы','До финдиректора'], desc:'Управление капиталом, инвестиционный анализ, финансовое планирование. Переподготовка с дипломом.',                   why:'Этот курс — мост между бухгалтерией и управлением финансами. Именно то, что нужно для роста до финансового директора.', url:'https://www.klerk.ru/learn/event/50430/'},
+  marketplace: {icon:'🛒', name:'Курс «Бухгалтер маркетплейса»',    tags:['Удостоверение','WB / Ozon / Яндекс','2026'], desc:'Учёт на Wildberries, Ozon, Яндекс.Маркет: комиссии, возвраты, НДС, отчётность. Актуально для 2026 года.',             why:'Маркетплейсы — самый быстрорастущий сектор. Бухгалтеры с этой специализацией в постоянном дефиците.', url:'https://www.klerk.ru/learn/event/50296/'},
+  neuro:       {icon:'🤖', name:'Нейросети и Power BI для бухгалтера', tags:['AI-инструменты','Power BI','Автоматизация'], desc:'Практический курс: автоматизация рутины с помощью нейросетей и построение управленческих дашбордов в Power BI.',   why:'Вы уже опытный специалист. Нейросети и BI помогут делать то же самое в 3 раза быстрее — это конкурентное преимущество.', url:'https://www.klerk.ru/learn/event/51090/'},
+  glavbuh_osno:{icon:'🏢', name:'Курс «Главный бухгалтер на ОСНО»', tags:['Диплом гособразца','ОСНО','6 месяцев'],    desc:'Переподготовка: НДС, налог на прибыль, бухгалтерская отчётность, налоговые проверки для крупного бизнеса.',           why:'Полная карта для работы главбухом на ОСНО. Закрывает все пробелы — от теории до налоговых рисков.', url:'https://www.klerk.ru/learn/event/50828/'},
+  glavbuh_usn: {icon:'🏪', name:'Курс «Главный бухгалтер на УСН»', tags:['Диплом гособразца','УСН','Малый бизнес'],  desc:'Переподготовка для малого бизнеса: УСН 6% и 15%, КУДиР, отчётность в ФНС, страховые взносы, налоговые риски.',       why:'УСН — своя специфика. Курс даёт систему, а не разрозненные знания, и охватывает все актуальные изменения 2026 года.', url:'https://www.klerk.ru/learn/event/48058/'},
+  buh_zarplata:{icon:'💰', name:'Курс «Бухгалтер по зарплате»',     tags:['Диплом гособразца','Зарплата','Страхвзносы'], desc:'Расчёт зарплаты, отпускных, больничных, страховых взносов, НДФЛ, отчётность в ФНС и СФР.',                          why:'Участок зарплаты стабилен и востребован. После курса вы ведёте его самостоятельно и уверенно.', url:'https://www.klerk.ru/learn/event/48119/'},
+  torgovlya:   {icon:'🏬', name:'Курс «Учёт в торговле»',           tags:['Удостоверение','Торговля','Отраслевой учёт'], desc:'Торговая наценка, себестоимость, инвентаризация, розница, опт — всё в одном курсе с удостоверением.',              why:'Торговля — самый распространённый вид бизнеса. Отраслевые знания открывают больше возможностей и увеличивают ценность.', url:'https://www.klerk.ru/learn/event/50972/'},
+  stroit:      {icon:'🏗️', name:'Курс «Учёт в строительстве»',      tags:['Удостоверение','Строительство','Отрасль'],  desc:'КС-2, КС-3, незавершённое строительство, подрядчики, НДС в строительстве. Сложная и высокооплачиваемая специфика.',  why:'Строительство — одна из сложнейших отраслей для учёта. Специалисты с этими знаниями ценятся выше рынка.', url:'https://www.klerk.ru/learn/event/48758/'},
+  ved:         {icon:'🌍', name:'Курс «Бухгалтер ВЭД»',              tags:['Удостоверение','ВЭД','Валютный контроль'], desc:'Валютный контроль, таможня, импорт/экспорт, НДС при ВЭД, курсовые разницы. Актуально в 2026 году.',               why:'ВЭД — узкая специализация с высоким спросом. Правильные знания здесь существенно увеличивают вашу рыночную стоимость.', url:'https://www.klerk.ru/learn/event/51304/'},
+  premium:     {icon:'⭐', name:'Премиум-подписка Клерк',            tags:['Все курсы','Консультации','Вебинары','Безлимит'], desc:'Доступ ко всем курсам, консультациям экспертов, вебинарам, правовым базам и сервисам. Всё в одной подписке.',     why:'Вам нужна гибкость — не один курс, а доступ ко всему сразу. Премиум — идеальный вариант, чтобы двигаться в своём темпе.', url:'https://edu.klerk.ru/last-premium'},
+  choice:      {icon:'🎯', name:'Выберите направление', tags:[], desc:null, why:null, url:null, isChoice:true},
+};
+
+const CHOICE_OPTS = [
+  {name:'Курс «Бухгалтер с нуля»',          desc:'Профессия с нуля, диплом государственного образца', r:'buh_nulya'},
+  {name:'Курс «Главный бухгалтер на УСН»',  desc:'Малый бизнес, самозанятость, ИП',                   r:'glavbuh_usn'},
+  {name:'Курс «Кадровик с нуля»',           desc:'Смежная с бухгалтерией специальность',               r:'kadrovik'},
+  {name:'Премиум-подписка',                  desc:'Попробуйте все курсы сразу без ограничений',         r:'premium'},
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+
+let s = {screen:'start', qId:null, history:[], result:null};
+
+// ─── PROGRESS ─────────────────────────────────────────────────────────────────
+
+function pct(id){
+  if(!id) return 0;
+  if(id==='q1')       return 12;
+  if(id.startsWith('q2_')) return 28;
+  if(id.startsWith('q3_')) return 48;
+  if(id==='q_prio')   return 67;
+  if(id==='q_fmt')    return 84;
+  return 100;
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+
+const card = document.getElementById('card');
+const LETTERS = ['А','Б','В','Г','Д','Е'];
+
+function render(){
+  if(s.screen==='start')    renderStart();
+  else if(s.screen==='q')   renderQ();
+  else if(s.screen==='res') renderRes();
+}
+
+function renderStart(){
+  card.innerHTML=`
+  <div class="screen start">
+    <span class="start-emoji">📚</span>
+    <h1 class="start-h">Подберём подходящее<br>обучение за 2 минуты</h1>
+    <p class="start-sub">Ответьте на несколько вопросов —<br>и мы покажем курс, который подходит именно вам</p>
+    <div class="start-pills">
+      <div class="pill"><div class="pill-dot"></div>4–5 вопросов</div>
+      <div class="pill"><div class="pill-dot"></div>Без регистрации</div>
+      <div class="pill"><div class="pill-dot"></div>Персональный результат</div>
+    </div>
+    <button class="btn-start" onclick="start()">Начать &rarr;</button>
+  </div>`;
+}
+
+function renderQ(){
+  const q = Q[s.qId];
+  const p = pct(s.qId);
+  const canBack = s.history.length > 0;
+  const optsHtml = q.opts.map((o,i)=>`
+    <button class="opt" onclick="pick(${i})">
+      <span class="opt-idx">${LETTERS[i]||i+1}</span>
+      <span class="opt-txt">${o.t}</span>
+    </button>`).join('');
+  card.innerHTML=`
+  <div class="screen">
+    <div class="prog">
+      <div class="prog-hdr">
+        <span class="prog-lbl">${q.label}</span>
+        <span class="prog-pct">${p}%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+    </div>
+    <div class="q-text">${q.text}</div>
+    <div class="opts">${optsHtml}</div>
+    <button class="back-btn" onclick="back()" ${!canBack?'disabled':''}>&#8592; Назад</button>
+  </div>`;
+  // animate fill
+  requestAnimationFrame(()=>{
+    const el=document.getElementById('pf');
+    if(el) requestAnimationFrame(()=>el.style.width=p+'%');
+  });
+}
+
+function renderRes(){
+  const res = RESULTS[s.result];
+  if(res.isChoice){ renderChoice(); return; }
+  const tagsHtml = res.tags.map(t=>`<span class="res-tag">${t}</span>`).join('');
+  card.innerHTML=`
+  <div class="screen">
+    <div class="prog">
+      <div class="prog-hdr">
+        <span class="prog-lbl">Результат готов</span>
+        <span class="prog-pct">&#10003; Завершено</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+    </div>
+    <div class="res-badge">&#10003; Персональная рекомендация</div>
+    <div class="res-label">Ваш курс</div>
+    <div class="res-name">${res.icon} ${res.name}</div>
+    <div class="res-desc">${res.desc}</div>
+    <div class="res-tags">${tagsHtml}</div>
+    <div class="divider"></div>
+    <div class="why-box">
+      <div class="why-title">Почему именно этот курс</div>
+      <div class="why-text">${res.why}</div>
+    </div>
+    ${courseCard(s.result)}
+    <div class="cta">
+      <a href="${res.url}" target="_blank" class="btn-orange">Перейти к курсу &rarr;</a>
+      <button class="btn-outline" onclick="consult()">Получить консультацию</button>
+      <button class="restart" onclick="restart()">Пройти заново</button>
+    </div>
+  </div>`;
+  requestAnimationFrame(()=>{
+    const el=document.getElementById('pf');
+    if(el) requestAnimationFrame(()=>el.style.width='100%');
+  });
+}
+
+function renderChoice(){
+  const cardsHtml = CHOICE_OPTS.map(o=>`
+    <button class="choice-card" onclick="pickResult('${o.r}')">
+      <div class="cc-name">${o.name}</div>
+      <div class="cc-desc">${o.desc}</div>
+    </button>`).join('');
+  card.innerHTML=`
+  <div class="screen">
+    <div class="prog">
+      <div class="prog-hdr">
+        <span class="prog-lbl">Выберите направление</span>
+        <span class="prog-pct">&#10003; Завершено</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="pf" style="width:0%"></div></div>
+    </div>
+    <div class="res-badge">&#127919; Подберём вместе</div>
+    <div class="res-name" style="font-size:21px;margin-bottom:8px">Какое направление вам ближе?</div>
+    <div class="res-desc">Выберите один из вариантов — мы покажем подходящий курс</div>
+    <div class="choice-grid">${cardsHtml}</div>
+    <button class="btn-outline" onclick="consult()">Не знаю — хочу консультацию</button>
+    <button class="restart" onclick="restart()">Пройти заново</button>
+  </div>`;
+  requestAnimationFrame(()=>{
+    const el=document.getElementById('pf');
+    if(el) requestAnimationFrame(()=>el.style.width='100%');
+  });
+}
+
+// ─── ACTIONS ──────────────────────────────────────────────────────────────────
+
+function start(){ s={screen:'q', qId:'q1', history:[], result:null}; render(); }
+
+function pick(i){
+  const opt = Q[s.qId].opts[i];
+  if(opt.r) s.result = opt.r;
+  s.history.push(s.qId);
+  if(opt.next==='result'){ s.screen='res'; }
+  else { s.qId=opt.next; s.screen='q'; }
+  render();
+}
+
+function back(){
+  if(!s.history.length) return;
+  s.qId = s.history.pop();
+  s.screen = 'q';
+  render();
+}
+
+function pickResult(r){ s.result=r; s.screen='res'; render(); }
+
+function consult(){ alert('Здесь будет форма консультации с отделом продаж.'); }
+
+function restart(){ s={screen:'start', qId:null, history:[], result:null}; render(); }
+
+// ─── COURSE STYLES ────────────────────────────────────────────────────────────
+
+const STYLES = {
+  buh_nulya:   {grad:'linear-gradient(135deg,#1851E5,#3b82f6)', badge:'Переподготовка'},
+  glavbuh_osno:{grad:'linear-gradient(135deg,#1038B0,#1851E5)', badge:'Переподготовка'},
+  glavbuh_usn: {grad:'linear-gradient(135deg,#0284C7,#38bdf8)', badge:'Переподготовка'},
+  buh_zarplata:{grad:'linear-gradient(135deg,#0891B2,#22d3ee)', badge:'Переподготовка'},
+  analitik_1c: {grad:'linear-gradient(135deg,#0F766E,#14b8a6)', badge:'Переподготовка'},
+  kadrovik:    {grad:'linear-gradient(135deg,#6D28D9,#a78bfa)', badge:'Переподготовка'},
+  findirector: {grad:'linear-gradient(135deg,#92400E,#f59e0b)', badge:'Переподготовка'},
+  upravl:      {grad:'linear-gradient(135deg,#059669,#34d399)', badge:'Повышение квалификации'},
+  marketplace: {grad:'linear-gradient(135deg,#B91C1C,#f87171)', badge:'Повышение квалификации'},
+  ved:         {grad:'linear-gradient(135deg,#065F46,#10b981)', badge:'Повышение квалификации'},
+  torgovlya:   {grad:'linear-gradient(135deg,#C2410C,#fb923c)', badge:'Повышение квалификации'},
+  stroit:      {grad:'linear-gradient(135deg,#78350F,#d97706)', badge:'Повышение квалификации'},
+  neuro:       {grad:'linear-gradient(135deg,#4C1D95,#8b5cf6)', badge:'Практический курс'},
+  premium:     {grad:'linear-gradient(135deg,#92400E,#fbbf24)', badge:'Подписка'},
+};
+
+const KPP_IMG = 'https://i.klerk.ru/69ZJOmkOMsTpNtPppdJ-OkydQXfsN6uaDlhgcuiQ4b8//aHR0cHM6Ly93d3cu/a2xlcmsucnUvbnV4/dGltYWdlcy9sZWFy/bi9wb3N0ZXIva3Bw/LnBuZw.webp';
+
+function courseCard(id){
+  const r = RESULTS[id];
+  const st = STYLES[id] || {grad:'linear-gradient(135deg,#1851E5,#3b82f6)', badge:'Курс'};
+  return `
+  <a class="rcc" href="${r.url}" target="_blank">
+    <div class="rcc-img" style="background-image:url('${KPP_IMG}')">
+      <div class="rcc-overlay" style="background:${st.grad};opacity:.82"></div>
+      <div class="rcc-badge" style="position:absolute;top:12px;left:12px">${st.badge}</div>
+      <div class="rcc-overlay" style="background:linear-gradient(to top,rgba(0,0,0,.55) 0%,transparent 60%);opacity:1"></div>
+      <div style="position:absolute;bottom:14px;left:16px;right:16px">
+        <div style="font-size:22px;margin-bottom:4px">${r.icon}</div>
+        <div class="rcc-name">${r.name}</div>
+      </div>
+    </div>
+    <div class="rcc-foot">
+      <div class="rcc-tags">${r.tags.slice(0,2).join(' · ')}</div>
+      <div class="rcc-go">Открыть курс →</div>
+    </div>
+  </a>`;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>

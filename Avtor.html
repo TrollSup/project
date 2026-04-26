@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>АВТОРИЗАЦИЯ — программа Клерк.ру для начинающих авторов</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1E1A1B;
+      --bg2: #282727;
+      --bg3: #302f2f;
+      --text: #FFFFFF;
+      --yellow: #F5F378;
+      --purple: #DCC2FE;
+      --coral: #E85D44;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 200;
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: 3px;
+      color: var(--text); text-decoration: none;
+    }
+    .header-right { display: flex; gap: 10px; }
+    .social-link {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.35);
+      display: flex; align-items: center; justify-content: center;
+      color: white; text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .social-link:hover { border-color: var(--yellow); color: var(--yellow); }
+    .social-link svg { width: 15px; height: 15px; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      padding: 100px 48px 80px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero-content {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      align-items: center;
+      gap: 48px;
+      position: relative; z-index: 3;
+    }
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .hero-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(72px, 10vw, 160px);
+      line-height: 0.88;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      pointer-events: none; user-select: none;
+    }
+    .hero-subtitle {
+      font-size: 19px; line-height: 1.6;
+      max-width: 560px;
+      color: rgba(255,255,255,0.9);
+    }
+    .hero-meta { }
+    .hero-meta .label { font-size: 15px; opacity: 0.6; display: block; margin-bottom: 3px; }
+    .hero-meta .value {
+      font-size: 16px; font-weight: 500;
+      border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 8px; padding: 6px 14px; display: inline-block;
+    }
+    .hero-cta {
+      display: flex; gap: 16px;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 18px 44px;
+      background: var(--yellow); color: var(--bg);
+      border-radius: 14px; font-size: 19px; font-weight: 500;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-secondary {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 18px 44px;
+      background: transparent; color: var(--text);
+      border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.38);
+      font-size: 19px; text-decoration: none;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .btn-secondary:hover { border-color: white; transform: translateY(-1px); }
+
+    /* Hero illustration */
+    .hero-illustration {
+      width: 100%;
+      max-width: 480px;
+      pointer-events: none;
+    }
+    /* Wavy line */
+    .hero-wave {
+      position: absolute; bottom: 0; left: -5%; width: 110%;
+      z-index: 1; pointer-events: none;
+    }
+
+    /* ── ABOUT ── */
+    .about { padding: 90px 48px 80px; }
+    .about-inner { max-width: 1320px; margin: 0 auto; }
+
+    .about-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+      margin-bottom: 40px;
+    }
+    .about-intro-text {
+      font-size: 22px; line-height: 1.6;
+      color: rgba(255,255,255,0.93);
+    }
+    .about-intro-text a { color: var(--coral); text-decoration: underline; }
+
+    /* Sticky note */
+    .sticky-wrap {
+      display: flex; justify-content: flex-end; align-items: flex-start;
+      padding-top: 10px;
+    }
+    .sticky-note {
+      background: var(--yellow);
+      color: var(--bg);
+      padding: 28px 28px 32px;
+      border-radius: 4px;
+      max-width: 300px;
+      transform: rotate(3deg);
+      position: relative;
+      box-shadow: 3px 6px 24px rgba(0,0,0,0.35);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 21px;
+      line-height: 1.2;
+      letter-spacing: 0.5px;
+    }
+    .sticky-note::before {
+      content: '';
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      width: 32px; height: 14px;
+      background: rgba(30,26,27,0.25);
+      border-radius: 0 0 6px 6px;
+    }
+    .sticky-icon {
+      position: absolute; top: -28px; right: -20px;
+      font-size: 32px; transform: rotate(-20deg);
+    }
+
+    /* Two-column cards */
+    .about-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .about-card-dark {
+      background: var(--bg2);
+      border-radius: 28px;
+      padding: 44px 44px 0;
+      position: relative;
+      overflow: hidden;
+      min-height: 420px;
+    }
+    .about-card-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(34px, 3.5vw, 52px);
+      color: var(--yellow);
+      line-height: 1;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+    .about-card-text {
+      font-size: 16px; line-height: 1.65;
+      color: rgba(255,255,255,0.75);
+      max-width: 340px;
+    }
+    .about-card-mascot {
+      position: absolute; bottom: 0; right: 0;
+      width: 180px; pointer-events: none;
+    }
+
+    .about-card-purple {
+      background: var(--purple);
+      border-radius: 28px;
+      padding: 44px;
+      color: var(--bg);
+    }
+    .about-card-purple-title {
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      color: var(--bg);
+    }
+    .write-list {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 22px;
+    }
+    .write-list li {
+      display: flex; gap: 16px;
+      font-size: 15px; line-height: 1.6;
+      color: rgba(30,26,27,0.85);
+    }
+    .write-list li::before {
+      content: '✦';
+      font-size: 14px; color: var(--bg);
+      flex-shrink: 0; margin-top: 2px;
+    }
+
+    /* ── FOR WHOM ── */
+    .for-whom {
+      padding: 80px 48px 20px;
+      text-align: center;
+      position: relative;
+    }
+    .section-title-white {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(38px, 5vw, 70px);
+      color: var(--text);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    /* Hanging rope + cards */
+    .rope-scene {
+      position: relative;
+      margin: 40px 0 0;
+      width: 100vw;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 300px;
+    }
+    .rope-svg {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 200px;
+      pointer-events: none;
+    }
+    .hanging-cards {
+      display: flex;
+      justify-content: space-around;
+      padding: 0 40px;
+      position: absolute;
+      top: 24px; left: 0; right: 0;
+    }
+    .hanging-card {
+      width: 210px;
+      border-radius: 18px 18px 14px 14px;
+      overflow: hidden;
+      position: relative;
+      transform-origin: top center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+      display: flex; flex-direction: column;
+    }
+    .hanging-card:nth-child(1) { background: var(--yellow); transform: rotate(-4deg); margin-top: 10px; }
+    .hanging-card:nth-child(2) { background: var(--coral); transform: rotate(2deg); margin-top: -5px; }
+    .hanging-card:nth-child(3) { background: var(--purple); transform: rotate(-2deg); margin-top: 15px; }
+
+    .card-clip {
+      width: 28px; height: 14px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 0 0 6px 6px;
+      margin: 0 auto;
+      position: relative; z-index: 2;
+    }
+    .card-art {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+      min-height: 180px;
+    }
+    .card-label {
+      background: rgba(0,0,0,0.12);
+      text-align: center;
+      padding: 14px 12px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 15px; letter-spacing: 0.5px;
+      color: rgba(0,0,0,0.8);
+      line-height: 1.2;
+    }
+    .hanging-card:nth-child(2) .card-label { color: rgba(255,255,255,0.9); background: rgba(0,0,0,0.25); }
+
+    /* ── FAQ FULLSCREEN ── */
+    .faq-full {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 48px 20px;
+      background: var(--bg);
+    }
+    .faq-full-inner {
+      background: var(--bg2);
+      border-radius: 28px;
+      padding: 77px 86px;
+      max-width: 840px;
+      width: 100%;
+      text-align: left;
+    }
+    .faq-full-q {
+      font-weight: 700;
+      font-size: 31px;
+      line-height: 1.35;
+      letter-spacing: 0.2px;
+      color: var(--text);
+      text-transform: uppercase;
+      margin-bottom: 29px;
+    }
+    .faq-full-a {
+      font-size: 20px;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.68);
+    }
+
+    /* ── WHAT YOU GET ── */
+    .what-get-wrapper {
+      position: relative;
+      height: 300vh;
+    }
+    .what-get {
+      padding: 80px 48px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .what-get-scene {
+      position: relative;
+      width: 100%;
+      max-width: 1080px;
+      margin: 40px auto 0;
+      height: 560px;
+      flex-shrink: 0;
+    }
+    .mascot-center {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 180px;
+    }
+    .float-card {
+      position: absolute;
+      border-radius: 20px;
+      padding: 28px 30px;
+      text-align: left;
+      max-width: 290px;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.28);
+      opacity: 0;
+      transform: translateY(160px);
+      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.65s ease;
+    }
+    .float-card.card-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .float-card.yellow { background: var(--yellow); color: var(--bg); }
+    .float-card.purple { background: var(--purple); color: var(--bg); }
+    .float-card h4 { font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .float-card p { font-size: 14px; line-height: 1.6; opacity: 0.85; }
+
+    .fc-tl { top: 20px; left: 0; }
+    .fc-tr { top: 10px; right: 0; }
+    .fc-bl { bottom: 50px; left: 20px; }
+    .fc-br { bottom: 30px; right: 10px; }
+
+    /* Confetti dots */
+    .confetti { position: absolute; pointer-events: none; }
+
+    /* ── CAROUSEL SECTIONS ── */
+    .carousel-section { padding: 80px 48px; }
+    .carousel-section .inner { max-width: 1320px; margin: 0 auto; }
+    .carousel-header {
+      display: flex; justify-content: space-between;
+      align-items: flex-end; margin-bottom: 40px;
+      gap: 20px;
+    }
+    .carousel-header .section-title-white {
+      max-width: 500px; line-height: 1;
+    }
+    .yellow-nav {
+      display: flex; gap: 8px; flex-shrink: 0;
+      padding-bottom: 4px;
+    }
+    .ynav-btn {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 36px; color: var(--yellow);
+      padding: 0 6px; line-height: 1;
+      transition: opacity 0.2s;
+    }
+    .ynav-btn:hover { opacity: 0.7; }
+
+    .carousel-wrap { overflow: hidden; }
+    .carousel-track {
+      display: flex; gap: 20px;
+      transition: transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94);
+      will-change: transform;
+    }
+
+    /* Mentor card */
+    .mentor-card {
+      flex: 0 0 240px;
+      background: var(--bg2);
+      border-radius: 20px;
+      overflow: hidden;
+      padding-bottom: 28px;
+    }
+    .mentor-photo {
+      width: 100%; height: 220px;
+      object-fit: cover;
+      display: block;
+      background: var(--bg3);
+      position: relative;
+      overflow: hidden;
+    }
+    .mentor-photo-inner {
+      width: 100%; height: 220px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 72px;
+    }
+    .mentor-info { padding: 20px 20px 0; }
+    .mentor-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px; letter-spacing: 0.5px;
+      color: var(--yellow); margin-bottom: 3px;
+    }
+    .mentor-role {
+      font-size: 13px; color: var(--yellow);
+      opacity: 0.7; margin-bottom: 12px;
+    }
+    .mentor-desc {
+      font-size: 13px; line-height: 1.6;
+      color: rgba(255,255,255,0.65);
+    }
+
+    /* Testimonial card */
+    .review-card {
+      flex: 0 0 300px;
+      background: var(--bg2);
+      border-radius: 20px;
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .review-top {
+      display: flex; gap: 14px;
+      align-items: center; margin-bottom: 16px;
+    }
+    .review-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--bg3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .review-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 19px; letter-spacing: 0.5px;
+      color: var(--yellow); line-height: 1.1;
+    }
+    .review-text {
+      font-size: 14px; line-height: 1.7;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 12px;
+    }
+    .review-expand {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,0.4);
+      font-size: 18px;
+      padding: 8px 4px 0;
+      transition: color 0.2s;
+      margin-top: auto;
+      align-self: center;
+      display: block;
+    }
+    .review-expand:hover { color: var(--yellow); }
+    .review-more { display: none; }
+    .review-more.open { display: block; }
+
+    /* Testimonials decoration */
+    .testimonials-wrap { position: relative; }
+    .testimonials-deco {
+      position: absolute; bottom: -20px; left: -10px;
+      pointer-events: none; opacity: 0.85;
+    }
+
+    /* ── HOW TO APPLY ── */
+    .how-to {
+      padding: 80px 48px;
+      background: var(--purple);
+      color: var(--bg);
+      position: relative;
+      overflow: hidden;
+    }
+    .how-to .inner { max-width: 1200px; margin: 0 auto; }
+    .how-to .section-title-white { color: var(--bg); }
+    .how-to-text {
+      font-size: 18px; line-height: 1.65;
+      max-width: 700px; margin-bottom: 44px;
+      color: rgba(30,26,27,0.8);
+    }
+    .how-to-text strong { color: var(--bg); }
+
+    /* Email illustration */
+    .email-card {
+      max-width: 560px;
+      margin: 0 auto 50px;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+    .email-bar {
+      background: var(--bg2);
+      padding: 14px 20px;
+      display: flex; gap: 8px; align-items: center;
+    }
+    .email-dot { width: 11px; height: 11px; border-radius: 50%; }
+    .email-body { padding: 28px 32px; color: var(--bg); }
+    .email-from {
+      font-size: 12px; color: #888; margin-bottom: 4px;
+    }
+    .email-to {
+      font-size: 12px; color: #888; margin-bottom: 20px;
+    }
+    .email-to strong { color: var(--bg); }
+    .email-text { font-size: 15px; line-height: 1.6; }
+    .email-badge {
+      display: inline-block;
+      background: var(--yellow); color: var(--bg);
+      border-radius: 6px; padding: 2px 8px;
+      font-weight: 600; font-size: 13px;
+      margin: 0 2px;
+    }
+
+    .how-to-cta {
+      display: flex; gap: 16px; justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-dark {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 18px 44px;
+      background: var(--bg); color: var(--text);
+      border-radius: 14px; font-size: 19px; font-weight: 500;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-dark:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-outline-dark {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 18px 44px;
+      background: transparent; color: var(--bg);
+      border-radius: 14px; border: 1.5px solid rgba(30,26,27,0.4);
+      font-size: 19px; text-decoration: none;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+    .btn-outline-dark:hover { border-color: var(--bg); transform: translateY(-1px); }
+
+    /* How-to wave deco */
+    .how-to-wave {
+      position: absolute; top: 0; right: -40px;
+      width: 320px; opacity: 0.2; pointer-events: none;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg2);
+      padding: 52px 48px 40px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 24px;
+    }
+    .footer-year { font-size: 13px; color: rgba(255,255,255,0.4); }
+    .footer-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px; letter-spacing: 3px;
+      color: var(--text); text-decoration: none;
+    }
+    .footer-team-label {
+      font-size: 12px; letter-spacing: 1.5px;
+      text-transform: uppercase; color: rgba(255,255,255,0.4);
+    }
+    .footer-credits {
+      list-style: none;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 8px;
+    }
+    .footer-credits li { font-size: 13px; color: rgba(255,255,255,0.35); text-align: center; }
+    .footer-credits strong { color: rgba(255,255,255,0.52); }
+  </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header>
+  <a href="#" class="logo">КЛЕРК.РУ</a>
+  <div class="header-right">
+    <a href="https://t.me/klerk_ru" class="social-link" aria-label="Telegram" target="_blank">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8l-1.7 8c-.13.59-.48.73-.97.46l-2.67-1.97-1.29 1.24c-.14.14-.27.27-.55.27l.19-2.73 4.98-4.5c.22-.19-.05-.3-.33-.11l-6.15 3.87-2.65-.82c-.57-.18-.58-.57.12-.85l10.36-4c.47-.17.88.11.66.14z"/>
+      </svg>
+    </a>
+    <a href="https://vk.com/klerkru" class="social-link" aria-label="ВКонтакте" target="_blank">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21.547 7h-3.29a.743.743 0 00-.655.392s-1.312 2.416-1.734 3.23C14.734 12.813 14 12.126 14 11.11V7.603A1.104 1.104 0 0012.896 6.5h-2.474a1.982 1.982 0 00-1.75.813s1.255-.204 1.255 1.7c0 .47.013 2.09.013 2.09C9.69 11.246 8.764 9.053 8.18 7.392A.836.836 0 007.38 7H4.1a.392.392 0 00-.39.46C4.228 10.24 6.775 16.5 12.164 16.5c3.412 0 3.244-2.5 3.244-2.5v-1.368c0-.742.79-.7.79-.7s2.067.921 3.286 2.762c.394.587.77.808 1.363.808h2.4c.984 0 .344-1.098.127-1.453C21.56 11.892 19 9.5 19 9.5l2.729-2c.508-.37.318-2.5-.182-2.5z"/>
+      </svg>
+    </a>
+  </div>
+</header>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-left">
+      <h1 class="hero-title">АВТОРИЗАЦИЯ</h1>
+      <div class="hero-subtitle">
+        Приходите на программу для начинающих авторов,<br>
+        чтобы научиться писать о бухгалтерии и налогах<br>
+        и пополнить портфолио публикациями на Клерк.ру.
+      </div>
+      <div class="hero-meta">
+        <span class="label">Начинаем</span>
+        <span class="value">18 мая 2026 г.</span>
+      </div>
+      <div class="hero-cta">
+        <a href="#apply" class="btn-primary">Оставить заявку</a>
+        <a href="#conditions" class="btn-secondary">Подробные условия</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-illustration">
+    <svg viewBox="0 0 460 530" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Card back-left (yellow) -->
+      <g transform="rotate(-18, 165, 270)">
+        <rect x="50" y="90" width="215" height="295" rx="22" fill="#F5F378"/>
+        <rect x="66" y="106" width="183" height="263" rx="15" fill="rgba(30,26,27,0.1)"/>
+        <!-- Рублик -->
+        <text x="157" y="230" text-anchor="middle" fill="rgba(30,26,27,0.2)" font-family="'Bebas Neue',sans-serif" font-size="80">₽</text>
+      </g>
+      <!-- Card middle (purple) -->
+      <g transform="rotate(-5, 195, 255)">
+        <rect x="100" y="55" width="215" height="295" rx="22" fill="#DCC2FE"/>
+        <rect x="116" y="71" width="183" height="263" rx="15" fill="rgba(30,26,27,0.08)"/>
+        <text x="207" y="200" text-anchor="middle" fill="rgba(30,26,27,0.15)" font-family="'Bebas Neue',sans-serif" font-size="80">§</text>
+      </g>
+      <!-- Card front (coral/dark) -->
+      <g transform="rotate(7, 225, 245)">
+        <rect x="150" y="22" width="220" height="308" rx="22" fill="#E85D44"/>
+        <rect x="166" y="38" width="188" height="276" rx="15" fill="rgba(255,255,255,0.08)"/>
+        <!-- Mascot image -->
+        <image href="screp1.png" x="192" y="55" width="136" height="190" preserveAspectRatio="xMidYMid meet" transform="translate(520, 0) scale(-1, 1)"/>
+        <!-- Label strip -->
+        <rect x="166" y="270" width="188" height="44" rx="0" fill="rgba(0,0,0,0.25)"/>
+        <text x="260" y="297" text-anchor="middle" fill="white" font-family="'Bebas Neue',sans-serif" font-size="15" letter-spacing="2">БУДУЩИЙ АВТОР</text>
+      </g>
+    </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wavy purple line -->
+  <svg class="hero-wave" viewBox="0 0 1440 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 155 C150 70, 320 200, 480 140 C640 80, 760 195, 920 130 C1080 65, 1200 185, 1360 115 L1440 100"
+      stroke="#DCC2FE" stroke-width="3.5" fill="none" opacity="0.9"/>
+    <path d="M0 175 C130 115, 300 215, 460 165 C620 115, 740 205, 900 155 C1060 105, 1180 200, 1340 140 L1440 125"
+      stroke="#DCC2FE" stroke-width="1.5" fill="none" opacity="0.28"/>
+  </svg>
+</section>
+
+<!-- ═══ ABOUT ═══ -->
+<section class="about">
+  <div class="about-inner">
+
+    <!-- Top: intro text + sticky note -->
+    <div class="about-top">
+      <p class="about-intro-text">
+        «Авторизация» — это бесплатная четырёхнедельная программа, за время которой вы поработаете над разными
+        форматами финансовых текстов. Итог — несколько
+        <a href="https://klerk.ru">опубликованных материалов</a> на сайте Клерк.ру.
+      </p>
+      <div class="sticky-wrap">
+        <div class="sticky-note">
+          <div class="sticky-icon">🗂️</div>
+          У ЗАДАНИЙ БУДУТ ДЕДЛАЙНЫ, КОТОРЫЕ ВАЖНО СОБЛЮДАТЬ — СОВСЕМ КАК НА НАСТОЯЩЕЙ РАБОТЕ.
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-column cards -->
+    <div class="about-cards">
+
+      <!-- Dark card -->
+      <div class="about-card-dark">
+        <div class="about-card-title">ЧТО В ПРОГРАММЕ</div>
+        <p class="about-card-text">
+          Программа состоит из теоретической части, разборов реальных кейсов и практических заданий, но главное — это практика. Обратную связь вам будут давать редакторы и эксперты Клерк.ру — они же помогут довести ваши тексты до публикации.
+        </p>
+        <p class="about-card-text" style="margin-top:12px">
+          У заданий будут дедлайны, которые важно соблюдать — совсем как на настоящей работе.
+        </p>
+        <!-- Mascot illustration -->
+        <img class="about-card-mascot" src="screp4.png" alt="">
+      </div>
+
+      <!-- Purple card -->
+      <div class="about-card-purple">
+        <div class="about-card-purple-title">ЧТО ВАМ ПРЕДСТОИТ ПИСАТЬ</div>
+        <ul class="write-list">
+          <li>Разбор налоговых изменений для широкой аудитории. Научитесь структурировать законодательные новшества и объяснять их понятно — без воды и лишних ссылок.</li>
+          <li>Инструкция по заполнению отчётности, под конкретный запрос. Разберётесь, как пишут прикладные гайды для практикующих специалистов.</li>
+          <li>Разбор судебного решения или реального кейса — более сложный формат, который поможет понять логику юридического текста и его структуру.</li>
+          <li>Авторская колонка на придуманную вами тему. Вы можете поделиться опытом из практики, высказать мнение по спорному вопросу или разобрать реальный кейс. Главное, чтобы вышло небанально.</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOR WHOM ═══ -->
+<section class="for-whom">
+  <h2 class="section-title-white">КОМУ ПОДОЙДЁТ<br>ПРОГРАММА</h2>
+
+  <div class="rope-scene">
+    <!-- Rope SVG -->
+    <svg class="rope-svg" viewBox="0 0 900 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M60 20 Q230 80 450 30 Q670 -15 840 50"
+        stroke="#DCC2FE" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- Clips on rope -->
+      <line x1="170" y1="48" x2="170" y2="70" stroke="#DCC2FE" stroke-width="2"/>
+      <line x1="450" y1="31" x2="450" y2="53" stroke="#DCC2FE" stroke-width="2"/>
+      <line x1="725" y1="38" x2="725" y2="60" stroke="#DCC2FE" stroke-width="2"/>
+    </svg>
+
+    <div class="hanging-cards">
+      <!-- Card 1: yellow -->
+      <div class="hanging-card">
+        <div class="card-clip"></div>
+        <div class="card-art">
+          <img src="screp1.png" alt="" style="height:150px;width:auto;object-fit:contain;">
+        </div>
+        <div class="card-label">СТУДЕНТАМ-<br>БУХГАЛТЕРАМ</div>
+      </div>
+
+      <!-- Card 2: coral -->
+      <div class="hanging-card">
+        <div class="card-clip"></div>
+        <div class="card-art">
+          <img src="screp2.png" alt="" style="height:150px;width:auto;object-fit:contain;">
+        </div>
+        <div class="card-label">НАЧИНАЮЩИМ<br>СПЕЦИАЛИСТАМ</div>
+      </div>
+
+      <!-- Card 3: purple -->
+      <div class="hanging-card">
+        <div class="card-clip"></div>
+        <div class="card-art">
+          <img src="screp3.png" alt="" style="height:150px;width:auto;object-fit:contain;">
+        </div>
+        <div class="card-label">АВТОРАМ-<br>ПРАКТИКАМ</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══ FAQ FULLSCREEN ═══ -->
+<section class="faq-full">
+  <div class="faq-full-inner">
+    <div class="faq-full-q">Можно ли подать заявку,<br>если вы опытный автор?</div>
+    <p class="faq-full-a">Мы не запрещаем, но предупреждаем, что программа рассчитана на новичков в писательстве. Так что вам может быть попросту скучно. Лучше оставьте место тем, кому оно нужнее. А для вас мы подготовим что-нибудь интересное в следующий раз.</p>
+  </div>
+</section>
+
+<!-- ═══ WHAT YOU GET ═══ -->
+<div class="what-get-wrapper">
+<section class="what-get">
+  <h2 class="section-title-white">ЧТО ПОЛУЧАТ<br>УЧАСТНИКИ В ИТОГЕ</h2>
+
+  <div class="what-get-scene">
+
+    <!-- Floating callout cards -->
+    <div class="float-card purple fc-tl">
+      <h4>Несколько статей на Клерк.ру</h4>
+      <p>Опубликуем, если уложитесь в сроки и материалы примет редактор.</p>
+    </div>
+
+    <div class="float-card yellow fc-tr">
+      <h4>Рекомендательное письмо</h4>
+      <p>Или возможность обратиться за рекомендацией при устройстве на работу.</p>
+    </div>
+
+    <div class="float-card yellow fc-bl">
+      <h4>Теоретическую базу</h4>
+      <p>Лекции будут доступны на протяжении всей программы.</p>
+    </div>
+
+    <div class="float-card purple fc-br">
+      <h4>Документы о практике</h4>
+      <p>Официальное письмо в вуз о прохождении практики (если вы студент).</p>
+    </div>
+
+    <!-- Central mascot -->
+    <div class="mascot-center">
+      <img src="screp2.png" alt="" style="width:180px;height:auto;">
+    </div>
+
+  </div>
+</section>
+</div><!-- /.what-get-wrapper -->
+
+<!-- ═══ MENTORS CAROUSEL ═══ -->
+<section class="carousel-section">
+  <div class="inner">
+    <div class="carousel-header">
+      <h2 class="section-title-white">КТО БУДЕТ ВАШИМИ<br>НАСТАВНИКАМИ</h2>
+      <div class="yellow-nav">
+        <button class="ynav-btn" onclick="moveCarousel('mentors',-1)">←</button>
+        <button class="ynav-btn" onclick="moveCarousel('mentors',1)">→</button>
+      </div>
+    </div>
+    <div class="carousel-wrap">
+      <div class="carousel-track" id="mentors-track">
+
+        <div class="mentor-card">
+          <div class="mentor-photo">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=480&h=440&q=80" alt="Оксана Меркулова" style="width:100%;height:220px;object-fit:cover;object-position:center top;display:block;">
+          </div>
+          <div class="mentor-info">
+            <div class="mentor-name">ОКСАНА МЕРКУЛОВА</div>
+            <div class="mentor-role">Главный редактор</div>
+            <p class="mentor-desc">Работает в Клерк.ру 10 лет и прошла путь от автора до руководителя редакции. Специализируется на налоговом праве и бухгалтерском учёте.</p>
+          </div>
+        </div>
+
+        <div class="mentor-card">
+          <div class="mentor-photo">
+            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=480&h=440&q=80" alt="Татьяна Чернова" style="width:100%;height:220px;object-fit:cover;object-position:center top;display:block;">
+          </div>
+          <div class="mentor-info">
+            <div class="mentor-name">ТАТЬЯНА ЧЕРНОВА</div>
+            <div class="mentor-role">Шеф-редактор раздела «Налоги»</div>
+            <p class="mentor-desc">Окончила экономфак и юрфак. Была налоговым консультантом 6 лет, затем пришла в журналистику. Помогает авторам объяснять сложное просто.</p>
+          </div>
+        </div>
+
+        <div class="mentor-card">
+          <div class="mentor-photo">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=480&h=440&q=80" alt="Виктор Соколов" style="width:100%;height:220px;object-fit:cover;object-position:center top;display:block;">
+          </div>
+          <div class="mentor-info">
+            <div class="mentor-name">ВИКТОР СОКОЛОВ</div>
+            <div class="mentor-role">Шеф-редактор «Бухучёт»</div>
+            <p class="mentor-desc">Работает с финансовыми текстами 8 лет. Создавал контент для профессиональных изданий и онлайн-курсов. Специалист по 1С и МСФО.</p>
+          </div>
+        </div>
+
+        <div class="mentor-card">
+          <div class="mentor-photo">
+            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=480&h=440&q=80" alt="Елена Морозова" style="width:100%;height:220px;object-fit:cover;object-position:center top;display:block;">
+          </div>
+          <div class="mentor-info">
+            <div class="mentor-name">ЕЛЕНА МОРОЗОВА</div>
+            <div class="mentor-role">Редактор</div>
+            <p class="mentor-desc">Работает с текстами больше 12 лет. Специализируется на трудовом праве и кадровом учёте. Ведёт колонку о спорных ситуациях с ФНС.</p>
+          </div>
+        </div>
+
+        <div class="mentor-card">
+          <div class="mentor-photo">
+            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=480&h=440&q=80" alt="Наталья Кузнецова" style="width:100%;height:220px;object-fit:cover;object-position:center top;display:block;">
+          </div>
+          <div class="mentor-info">
+            <div class="mentor-name">НАТАЛЬЯ КУЗНЕЦОВА</div>
+            <div class="mentor-role">Редактор</div>
+            <p class="mentor-desc">Больше 7 лет редактирует статьи для разделов «Отчётность», «УСН», «НДС». Помогает авторам Клерк.ру находить и правильно описывать актуальную практику.</p>
+          </div>
+        </div>
+
+        <div class="mentor-card">
+          <div class="mentor-photo">
+            <img src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=480&h=440&q=80" alt="Анастасия Белова" style="width:100%;height:220px;object-fit:cover;object-position:center top;display:block;">
+          </div>
+          <div class="mentor-info">
+            <div class="mentor-name">АНАСТАСИЯ БЕЛОВА</div>
+            <div class="mentor-role">Редактор</div>
+            <p class="mentor-desc">Более 5 лет вникает в тонкости SEO-текстов по бухгалтерской тематике. Помогает авторам Клерк.ру попадать в топ поиска без потери смысла.</p>
+          </div>
+        </div>
+
+        <div class="mentor-card">
+          <div class="mentor-photo">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=480&h=440&q=80" alt="Дмитрий Орлов" style="width:100%;height:220px;object-fit:cover;object-position:center top;display:block;">
+          </div>
+          <div class="mentor-info">
+            <div class="mentor-name">ДМИТРИЙ ОРЛОВ</div>
+            <div class="mentor-role">Старший редактор</div>
+            <p class="mentor-desc">Опыт работы в редакции — почти 9 лет. Написал много топовых разборов судебных решений. Больше 5 лет курирует раздел «Арбитражная практика».</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS CAROUSEL ═══ -->
+<section class="carousel-section" style="padding-top:0;">
+  <div class="inner">
+    <div class="carousel-header">
+      <h2 class="section-title-white">ЧТО ГОВОРЯТ<br>О ПРОГРАММЕ УЧАСТНИКИ</h2>
+      <div class="yellow-nav">
+        <button class="ynav-btn" onclick="moveCarousel('reviews',-1)">←</button>
+        <button class="ynav-btn" onclick="moveCarousel('reviews',1)">→</button>
+      </div>
+    </div>
+
+    <div class="testimonials-wrap" style="position:relative">
+      <div class="carousel-wrap">
+        <div class="carousel-track" id="reviews-track">
+
+          <div class="review-card">
+            <div class="review-top">
+              <div class="review-avatar" style="background:linear-gradient(135deg,#fbc2eb,#a18cd1)">👩</div>
+              <div class="review-name">ЛЮБОВЬ ГРИППА-<br>ТРУНОВА</div>
+            </div>
+            <p class="review-text">«Авторизация» стала для меня стартом в новую жизнь! После окончания курса по бухгалтерии я не представляла, как начать реализовывать свои знания в текстах. На Клерк.ру я увидела приглашение на программу и решила рискнуть.</p>
+            <p class="review-text review-more" id="r1-more">Мне посчастливилось попасть к редактору Татьяне Черновой. Она увидела мой потенциал и направила его в нужное русло. У меня получилось написать качественный разбор налогового изменения.</p>
+            <button class="review-expand" onclick="toggleReview('r1-more',this)">∨</button>
+          </div>
+
+          <div class="review-card">
+            <div class="review-top">
+              <div class="review-avatar" style="background:linear-gradient(135deg,#a8edea,#5cb8b2)">👩</div>
+              <div class="review-name">ЕКАТЕРИНА<br>АРТЁМЕНКО</div>
+            </div>
+            <p class="review-text">Я проходила программу, когда только начинала публиковаться о финансах. На курсе нам рассказали про источники, структуру текста, как общаться с экспертами и оформлять статьи. Был очень сильный блок по работе с НПА.</p>
+            <p class="review-text review-more" id="r2-more">До сих пор он закрывает мои вопросы по официальным документам. Было бы здорово сделать эту часть ещё более подробной. После программы я стала регулярным автором Клерк.ру.</p>
+            <button class="review-expand" onclick="toggleReview('r2-more',this)">∨</button>
+          </div>
+
+          <div class="review-card">
+            <div class="review-top">
+              <div class="review-avatar" style="background:linear-gradient(135deg,#f6d365,#fda085)">🧑</div>
+              <div class="review-name">РУСЛАН ДЖАНОВ</div>
+            </div>
+            <p class="review-text">Мне очень понравилась «Авторизация». Было интересно копаться в арбитражных делах и пытаться глубоко погрузиться в кейс в целом.</p>
+            <p class="review-text review-more" id="r3-more">Очень зацепила работа с редактором, было суперполезно и познавательно. Впечатлило количество правок в тексте — это заставило задуматься об отточке мастерства. Большое спасибо за совместную работу!</p>
+            <button class="review-expand" onclick="toggleReview('r3-more',this)">∨</button>
+          </div>
+
+          <div class="review-card">
+            <div class="review-top">
+              <div class="review-avatar" style="background:linear-gradient(135deg,#DCC2FE,#9b59b6)">👩</div>
+              <div class="review-name">АНАСТАСИЯ<br>ХМЕЗЮК</div>
+            </div>
+            <p class="review-text">Мне было очень интересно и комфортно проходить программу — особенно ценно поработать с редакторами. Обратная связь всегда оставалась корректной, поддерживающей и при этом по делу.</p>
+            <p class="review-text review-more" id="r4-more">Что можно улучшить? Формат и время созвонов не всегда были удобны из-за разницы в часовых поясах. Программа оставила очень тёплое впечатление. Спасибо за поддержку!</p>
+            <button class="review-expand" onclick="toggleReview('r4-more',this)">∨</button>
+          </div>
+
+          <div class="review-card">
+            <div class="review-top">
+              <div class="review-avatar" style="background:linear-gradient(135deg,#F5F378,#c9c930)">👩</div>
+              <div class="review-name">ЛЮСЯ<br>ЗАКОВРЯЖИНА</div>
+            </div>
+            <p class="review-text">Мне очень понравилась «Авторизация», и даже сложно что-то предложить для улучшения. Я попала к прекрасному редактору, работа с ней была очень комфортной.</p>
+            <p class="review-text review-more" id="r5-more">Поначалу казалось, что две недели на один материал — это много, но на деле работа была достаточно плотной. В целом впечатления у меня самые хорошие. Я бы советовала программу всем, кто начинает путь автора.</p>
+            <button class="review-expand" onclick="toggleReview('r5-more',this)">∨</button>
+          </div>
+
+          <div class="review-card">
+            <div class="review-top">
+              <div class="review-avatar" style="background:linear-gradient(135deg,#fda085,#f6d365)">👩</div>
+              <div class="review-name">НАСТАСЬЯ<br>ПЛОТНИКОВА</div>
+            </div>
+            <p class="review-text">Я проходила программу в первом потоке. Именно здесь я наконец-то научилась работать с первоисточниками и перестала бояться НК РФ.</p>
+            <p class="review-text review-more" id="r6-more">Больше всего запомнилось взаимодействие с наставником. Отдельно хочу похвалить саму структуру курса — всё разбито на чёткие, логичные этапы. Благодаря этому прогресс был виден почти сразу.</p>
+            <button class="review-expand" onclick="toggleReview('r6-more',this)">∨</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Yellow scribble decoration -->
+      <svg class="testimonials-deco" width="160" height="120" viewBox="0 0 160 120" fill="none">
+        <path d="M20 80 Q40 30 80 60 Q120 90 140 40" stroke="#F5F378" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="35" cy="95" rx="18" ry="12" stroke="#F5F378" stroke-width="2.5" fill="none" transform="rotate(-20 35 95)"/>
+        <ellipse cx="65" cy="105" rx="14" ry="9" stroke="#F5F378" stroke-width="2" fill="none" transform="rotate(10 65 105)"/>
+        <path d="M130 70 L140 60 L135 72 L145 65" stroke="#F5F378" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW TO APPLY ═══ -->
+<section class="how-to" id="apply">
+  <!-- Wave decoration -->
+  <svg class="how-to-wave" viewBox="0 0 300 300" fill="none">
+    <path d="M300 0 Q200 80 300 160 Q200 240 300 300" stroke="rgba(30,26,27,0.15)" stroke-width="60" fill="none"/>
+  </svg>
+
+  <div class="inner">
+    <h2 class="section-title-white" style="color:var(--bg); margin-bottom: 28px;">КАК ПОДАТЬ ЗАЯВКУ</h2>
+    <p class="how-to-text">
+      Заполните заявку и сделайте небольшое тестовое задание. Мы выберем тех, чьи анкеты и работы понравятся редакции. Заявки принимаем <strong>до 26 апреля</strong>, тестовые задания — <strong>до 8 мая включительно</strong>.
+    </p>
+
+    <!-- Email illustration -->
+    <div class="email-card">
+      <div class="email-bar">
+        <div class="email-dot" style="background:#FF5F57"></div>
+        <div class="email-dot" style="background:#FFBD2E"></div>
+        <div class="email-dot" style="background:#28C840"></div>
+      </div>
+      <div class="email-body">
+        <div class="email-from">от: будущий_автор@mail.ru</div>
+        <div class="email-to">кому: <strong>редакции Клерк.ру</strong></div>
+        <div class="email-text">
+          Здравствуйте! Я прохожу отбор на программу «Авторизация» и хочу писать о
+          <span class="email-badge">налогах</span> и
+          <span class="email-badge">бухучёте</span>
+          для ваших читателей. Прикрепляю тестовое задание...
+        </div>
+      </div>
+    </div>
+
+    <div class="how-to-cta">
+      <a href="https://klerk.ru" class="btn-dark">Оставить заявку</a>
+      <a href="https://klerk.ru" class="btn-outline-dark" id="conditions">Подробные условия</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <span class="footer-year">2026</span>
+  <a href="https://klerk.ru" class="footer-logo">КЛЕРК.РУ</a>
+  <span class="footer-team-label">Команда проекта</span>
+  <ul class="footer-credits">
+    <li><strong>Редакторы:</strong> Оксана Меркулова, Анастасия Белова, Татьяна Чернова</li>
+    <li><strong>Корректоры:</strong> Ольга Сытник, Елена Грицун</li>
+    <li><strong>Дизайнер:</strong> Анастасия Илатовская</li>
+    <li><strong>Разработчики:</strong> Андрей Базаров, Иван Поляков</li>
+    <li><strong>Тестировщики:</strong> Антонина Высоцкая, Надежда Любимова</li>
+    <li><strong>Аналитик:</strong> Даниил Медведев</li>
+    <li><strong>Менеджеры проекта:</strong> Александра Анкудинова, Майя Савухина</li>
+  </ul>
+</footer>
+
+<script>
+  // ── Carousel logic ──
+  const carousels = {
+    mentors: { index: 0, id: 'mentors-track' },
+    reviews: { index: 0, id: 'reviews-track' }
+  };
+
+  function getGap() { return 20; }
+
+  function getCardW(track) {
+    const card = track.children[0];
+    if (!card) return 260;
+    return card.offsetWidth + getGap();
+  }
+
+  function moveCarousel(name, dir) {
+    const c = carousels[name];
+    const track = document.getElementById(c.id);
+    const total = track.children.length;
+    const wrap = track.parentElement;
+    const visible = Math.max(1, Math.floor(wrap.offsetWidth / getCardW(track)));
+    const maxIdx = Math.max(0, total - visible);
+    c.index = Math.min(Math.max(c.index + dir, 0), maxIdx);
+    track.style.transform = `translateX(-${c.index * getCardW(track)}px)`;
+  }
+
+  // Touch support
+  ['mentors-track','reviews-track'].forEach(id => {
+    const track = document.getElementById(id);
+    let sx = 0;
+    track.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+    track.addEventListener('touchend', e => {
+      const dx = sx - e.changedTouches[0].clientX;
+      const name = id.replace('-track','');
+      if (Math.abs(dx) > 40) moveCarousel(name, dx > 0 ? 1 : -1);
+    });
+    // Mouse drag
+    let down = false, msx = 0;
+    track.addEventListener('mousedown', e => { down = true; msx = e.clientX; track.style.cursor = 'grabbing'; });
+    window.addEventListener('mouseup', e => {
+      if (!down) return; down = false; track.style.cursor = '';
+      const dx = msx - e.clientX;
+      const name = id.replace('-track','');
+      if (Math.abs(dx) > 40) moveCarousel(name, dx > 0 ? 1 : -1);
+    });
+  });
+
+  // ── What-get scroll-driven card animation ──
+  (function () {
+    const wrapper = document.querySelector('.what-get-wrapper');
+    const cards = [
+      document.querySelector('.fc-tl'),
+      document.querySelector('.fc-tr'),
+      document.querySelector('.fc-bl'),
+      document.querySelector('.fc-br'),
+    ];
+    // Progress (0–1) at which each card flies in
+    const thresholds = [0.10, 0.30, 0.55, 0.75];
+
+    function update() {
+      const scrolled = window.scrollY - wrapper.offsetTop;
+      const scrollable = wrapper.offsetHeight - window.innerHeight;
+      const progress = Math.max(0, Math.min(1, scrolled / scrollable));
+      cards.forEach((card, i) => {
+        card.classList.toggle('card-visible', progress >= thresholds[i]);
+      });
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+
+  // ── Review expand (all cards toggle together) ──
+  function toggleReview(moreId, btn) {
+    const el = document.getElementById(moreId);
+    if (!el) return;
+    const willOpen = !el.classList.contains('open');
+    document.querySelectorAll('.review-more').forEach(m => m.classList.toggle('open', willOpen));
+    document.querySelectorAll('.review-expand').forEach(b => { b.textContent = willOpen ? '∧' : '∨'; });
+  }
+</script>
+</body>
+</html>

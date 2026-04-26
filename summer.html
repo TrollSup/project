@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Сколько дней до лета</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      overflow-x: hidden;
+      background: #6ec6e8;
+    }
+
+    /* ── Sky background ── */
+    .sky {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(175deg, #4ab5dc 0%, #7acfe8 35%, #a8dff0 65%, #c6eecc 100%);
+      z-index: 0;
+    }
+
+    /* ── Clouds ── */
+    .clouds {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 60%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .cloud {
+      position: absolute;
+      background: url('cloud.png') center / contain no-repeat;
+      width: 200px;
+      height: 113px; /* 800/451 ratio */
+    }
+    .c1 { top: 5%;  width: 220px; height: 124px; animation: drift1 28s linear infinite; }
+    .c2 { top: 16%; width: 160px; height: 90px;  animation: drift2 35s linear infinite; opacity: 0.85; }
+    .c3 { top: 3%;  width: 280px; height: 158px; animation: drift3 45s linear infinite; }
+    .c4 { top: 22%; width: 180px; height: 101px; animation: drift1 32s linear infinite 10s; opacity: 0.75; }
+
+    @keyframes drift1 { from { left: -300px; } to { left: calc(100% + 300px); } }
+    @keyframes drift2 { from { left: calc(100% + 300px); } to { left: -300px; } }
+    @keyframes drift3 { from { left: 20%; } to { left: calc(100% + 400px); } }
+
+    /* ── Grass (fixed, high z-index) ── */
+    .grass-layer {
+      position: fixed;
+      bottom: 0; left: 0;
+      width: 100%;
+      height: 400px;
+      background: url('grass.png') repeat-x bottom left;
+      background-size: 800px 400px;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    /* ── Character ── */
+    .character {
+      position: fixed;
+      bottom: 1px;
+      right: 270px;
+      width: 550px;
+      z-index: 101;
+      pointer-events: none;
+      transform: scaleX(-1) translateX(-60px);
+    }
+    .character svg { width: 100%; }
+
+    /* ── Decorative stickers ── */
+    .sticker {
+      position: absolute;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* ── Scrollable content wrapper ── */
+    .scroll-content {
+      position: relative;
+      z-index: 50;
+    }
+
+    /* ── Sections ── */
+    section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px 240px;
+    }
+
+    /* ── Glass card ── */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1.5px solid rgba(255, 255, 255, 0.55);
+      border-radius: 28px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+      padding: 50px 60px;
+      max-width: 700px;
+      width: 100%;
+      position: relative;
+
+      /* Emerge animation */
+      opacity: 0;
+      transform: translateY(80px);
+      transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .glass-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── HERO SECTION ── */
+    #hero-section {
+      position: relative;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding-bottom: 440px;
+    }
+
+    .hero-content {
+      width: 100%;
+      text-align: center;
+      padding: 0 16px;
+    }
+
+    .hero-title {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: clamp(28px, 5.5vw, 72px);
+      text-align: center;
+      color: #fff;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.2);
+      letter-spacing: 3px;
+      line-height: 1.15;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+    }
+
+    .timer-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 0;
+      width: 100%;
+    }
+    .timer-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+    }
+    .timer-num {
+      font-weight: 900;
+      font-size: clamp(56px, 12vw, 170px);
+      line-height: 1;
+      color: #fff;
+      text-shadow: 0 4px 0 rgba(0,0,0,0.10), 0 2px 28px rgba(0,0,0,0.15);
+      letter-spacing: -2px;
+    }
+    .timer-label {
+      font-size: clamp(11px, 1.6vw, 18px);
+      font-weight: 700;
+      color: rgba(255,255,255,0.8);
+      text-transform: lowercase;
+      letter-spacing: 0.5px;
+      margin-top: 6px;
+    }
+    .timer-sep {
+      font-size: clamp(44px, 9vw, 120px);
+      font-weight: 900;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.1;
+      align-self: flex-start;
+      padding-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .btn-recalc {
+      width: 100%;
+      background: linear-gradient(135deg, #ff6fa8, #ff4d9e);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 24px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 16px rgba(255, 77, 158, 0.4);
+    }
+    .btn-recalc:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 77, 158, 0.5); }
+    .btn-recalc:active { transform: translateY(0); }
+
+    /* ── SECTION TITLES (shared) ── */
+    .section-title {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: clamp(22px, 3.5vw, 46px);
+      text-align: center;
+      color: #fff;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.18);
+      letter-spacing: 2px;
+      line-height: 1.2;
+      text-transform: uppercase;
+      margin-bottom: 36px;
+    }
+
+    .section-content {
+      width: 100%;
+      max-width: 760px;
+      text-align: center;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── IDEAS SECTION ── */
+    #ideas-section {
+      position: relative;
+    }
+
+    .notepad {
+      background: #fdf9d3;
+      border-radius: 10px;
+      padding: 20px 24px;
+      position: relative;
+      box-shadow: 2px 4px 16px rgba(0,0,0,0.1);
+      min-height: 150px;
+      width: 100%;
+    }
+    .notepad::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 18px;
+      background: repeating-linear-gradient(90deg,
+        transparent 0px, transparent 16px,
+        #ff9eb5 16px, #ff9eb5 28px,
+        transparent 28px, transparent 34px,
+        #a0d4ff 34px, #a0d4ff 46px,
+        transparent 46px
+      );
+      border-radius: 10px 10px 0 0;
+    }
+    .notepad-text {
+      font-family: 'Caveat', cursive;
+      font-size: 34px;
+      color: #444;
+      line-height: 1.6;
+      padding-top: 8px;
+    }
+    .notepad-num {
+      position: absolute;
+      top: 28px; right: -18px;
+      width: 36px; height: 36px;
+      background: #d4c5ff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 900;
+      color: #7040b0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .smiley-sticker {
+      position: absolute;
+      bottom: -16px; left: 0;
+      width: 54px; height: 54px;
+    }
+
+    .ideas-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 24px;
+    }
+    .nav-btn {
+      background: rgba(255,255,255,0.5);
+      border: 1.5px solid rgba(255,255,255,0.7);
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      color: #555;
+      transition: background 0.2s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.75); transform: scale(1.08); }
+
+    .ideas-counter {
+      font-size: 14px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.8);
+    }
+
+    /* ── IDEAS + ADVENTURE: shift up & scale ── */
+    #ideas-section {
+      margin-top: 10px;
+    }
+    #adventure-section {
+      margin-top: 0;
+      padding-bottom: 360px;
+    }
+    #ideas-section .section-content,
+    #adventure-section .section-content {
+      zoom: 1.25;
+    }
+
+    /* ── ADVENTURE SECTION ── */
+    .polaroids {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .polaroid {
+      background: white;
+      border-radius: 6px;
+      padding: 14px 14px 56px;
+      box-shadow: 2px 4px 18px rgba(0,0,0,0.15);
+      width: 216px;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s;
+      position: relative;
+    }
+    .polaroid:nth-child(1) { transform: rotate(-3deg); }
+    .polaroid:nth-child(2) { transform: rotate(1.5deg); }
+    .polaroid:nth-child(3) {
+      transform: rotate(-1deg);
+      background: white;
+      border-radius: 6px;
+      padding: 14px 14px 56px;
+      box-shadow: 2px 4px 18px rgba(0,0,0,0.15);
+    }
+    .polaroid:hover { transform: rotate(0) scale(1.06) translateY(-6px); box-shadow: 4px 8px 28px rgba(0,0,0,0.2); z-index: 2; }
+
+    .polaroid-img {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 4px;
+      object-fit: cover;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .polaroid-img.blue  { background: linear-gradient(135deg, #6ec6e8, #4ab5dc); }
+    .polaroid-img.pink  { background: linear-gradient(135deg, #f093fb, #d86bca); }
+    .polaroid-img.sky   { background: linear-gradient(135deg, #82d6ee, #46afd9); }
+    .polaroid-img.purple { background: linear-gradient(135deg, #c792f7, #9b59d9); }
+
+    .polaroid-icon {
+      font-size: 36px;
+      margin-bottom: 4px;
+    }
+
+    .tape {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 44px; height: 20px;
+      background: rgba(255, 230, 100, 0.65);
+      border-radius: 3px;
+    }
+    .polaroid:nth-child(2) .tape { transform: translateX(-50%) rotate(3deg); }
+
+    .polaroid-caption {
+      font-family: 'Caveat', cursive;
+      font-size: 23px;
+      color: #555;
+      text-align: center;
+      position: absolute;
+      bottom: 8px; left: 8px; right: 8px;
+      line-height: 1.3;
+    }
+
+    /* ── Flowers decoration ── */
+    @keyframes sway-left  { 0%,100% { transform: scaleX(-1) rotate(-3deg); } 50% { transform: scaleX(-1) rotate(3deg); } }
+    @keyframes sway-right { 0%,100% { transform: rotate(3deg); } 50% { transform: rotate(-3deg); } }
+
+    .flowers-left, .flowers-right {
+      position: fixed;
+      bottom: 120px;
+      z-index: 99;
+      pointer-events: none;
+      width: 390px;
+      height: 390px;
+      background: url('tulpas.png') center / contain no-repeat;
+      transform-origin: bottom center;
+    }
+    .flowers-left  { left: 20px;  animation: sway-left  4s ease-in-out infinite; }
+    .flowers-right { right: -10px; animation: sway-right 4s ease-in-out infinite 0.5s; }
+
+    /* ── Nav bar ── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+    }
+    .navbar-logo {
+      font-weight: 900;
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: white;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      text-transform: uppercase;
+    }
+    .navbar-links { display: flex; gap: 10px; }
+    .nav-icon-btn {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.2);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      color: white;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+    .nav-icon-btn:hover { background: rgba(255,255,255,0.35); }
+
+    /* ── Scroll indicator ── */
+    .scroll-hint {
+      position: absolute;
+      bottom: 260px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      font-weight: 700;
+      animation: bounce 2s infinite;
+      z-index: 5;
+      letter-spacing: 1px;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* ── Sun sticker ── */
+    .sun-sticker {
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 72px; height: 72px;
+      animation: spin-slow 10s linear infinite;
+    }
+    @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+    /* ── Mountain sticker ── */
+    .mountain-sticker {
+      position: absolute;
+      bottom: -24px; left: -24px;
+      width: 56px; height: 56px;
+    }
+
+    /* ── Idea transition ── */
+    .notepad-text {
+      transition: opacity 0.25s;
+    }
+    .notepad-text.fading { opacity: 0; }
+
+    /* ── Section 4: Flowers section ── */
+    .flowers-section { padding-bottom: 280px; }
+
+    .flowers-card {
+      max-width: 520px;
+      text-align: center;
+    }
+    .flowers-card-title {
+      font-family: 'Caveat', cursive;
+      font-size: 32px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.95);
+      margin-bottom: 14px;
+      line-height: 1.3;
+    }
+    .flowers-card-sub {
+      font-size: 15px;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .tag {
+      background: rgba(255,255,255,0.45);
+      border: 1.5px solid rgba(255,255,255,0.6);
+      border-radius: 30px;
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .tag:hover { background: rgba(255,255,255,0.65); transform: scale(1.05); }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .glass-card { padding: 28px 22px; }
+      .timer-num { font-size: 54px; }
+      section { padding: 60px 16px 200px; }
+      .polaroids { gap: 14px; }
+      .polaroid { width: 140px; }
+      .character { width: 75px; right: 10px; bottom: 50px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sky -->
+<div class="sky"></div>
+
+<!-- Clouds -->
+<div class="clouds">
+  <div class="cloud c1" style="left:-200px"></div>
+  <div class="cloud c2" style="left:60%"></div>
+  <div class="cloud c3" style="left:40%"></div>
+  <div class="cloud c4" style="left:10%"></div>
+</div>
+
+
+<!-- Flowers (behind grass) -->
+<div class="flowers-left"></div>
+<div class="flowers-right"></div>
+
+<!-- Grass layer (on top of everything except character) -->
+<div class="grass-layer"></div>
+
+<!-- Character (fixed bottom right) -->
+<div class="character" id="character">
+  <img src="bunny.png" style="width:100%; height:auto;">
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-logo"></div>
+  <div class="navbar-links">
+    <a href="#" class="nav-icon-btn" title="Telegram">
+      <svg width="16" height="14" viewBox="0 0 24 20" fill="white"><path d="M22.3 0L1.1 8.3c-1.5.6-1.4 1.4-.3 1.8l5.4 1.7 12.5-7.9c.6-.4 1.1-.2.7.3L8.3 14.6l-.4 5.6c.6 0 .8-.3 1.1-.5l2.7-2.6 5.5 4.1c1 .6 1.7.3 2-1L23.9 1.3c.4-1.5-.6-2.2-1.6-1.3z"/></svg>
+    </a>
+    <a href="#" class="nav-icon-btn" title="VK">
+      <svg width="18" height="12" viewBox="0 0 28 16" fill="white"><path d="M15.4 16c-6.7 0-10.5-4.6-10.7-12.3H8c.1 5.6 2.6 8 4.6 8.4V3.7h3.5v5.2c1.9-.2 4-2 4.7-5.2H24c-.5 3.4-2.8 5.2-4.4 5.9 1.6.7 4.2 2.3 5.2 6.4h-3.8c-.8-2.6-2.8-4.7-6.3-5v5H15.4z"/></svg>
+    </a>
+  </div>
+</nav>
+
+<!-- Scrollable content -->
+<div class="scroll-content">
+
+  <!-- ──────────── SECTION 1: COUNTDOWN ──────────── -->
+  <section id="hero-section">
+    <div class="hero-content">
+      <div class="hero-title">Сколько дней<br>осталось до лета</div>
+      <div class="timer-row">
+        <div class="timer-unit">
+          <span class="timer-num" id="days">00</span>
+          <span class="timer-label">дней</span>
+        </div>
+        <div class="timer-sep">:</div>
+        <div class="timer-unit">
+          <span class="timer-num" id="hours">00</span>
+          <span class="timer-label">часов</span>
+        </div>
+        <div class="timer-sep">:</div>
+        <div class="timer-unit">
+          <span class="timer-num" id="minutes">00</span>
+          <span class="timer-label">минут</span>
+        </div>
+        <div class="timer-sep">:</div>
+        <div class="timer-unit">
+          <span class="timer-num" id="seconds">00</span>
+          <span class="timer-label">секунд</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      листай вниз
+    </div>
+  </section>
+
+  <!-- ──────────── SECTION 2: 30 IDEAS ──────────── -->
+  <section id="ideas-section">
+    <div class="section-content">
+      <div class="section-title">30 идей для идеального лета</div>
+      <div class="notepad">
+        <div class="notepad-num" id="ideaNum">1</div>
+        <p class="notepad-text" id="ideaText">Посадите что-нибудь. Вам развлечение, знакомому с дачей — помощь. Ну или хотя бы комнатные цветы пересадите.</p>
+      </div>
+      <div class="ideas-nav">
+        <button class="nav-btn" id="prevIdea">‹</button>
+        <span class="ideas-counter"><span id="ideaCurrent">1</span> / 30</span>
+        <button class="nav-btn" id="nextIdea">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────── SECTION 3: ADVENTURE ──────────── -->
+  <section id="adventure-section">
+    <div class="section-content">
+      <div class="section-title">Организовать<br>себе приключение</div>
+      <div class="polaroids">
+        <div class="polaroid">
+          <div class="tape"></div>
+          <div class="polaroid-img blue" style="display:flex;align-items:center;justify-content:center;">
+            <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="20" fill="rgba(255,255,255,0.3)"/><path d="M22 38 L30 20 L38 38 Z" fill="white" opacity="0.8"/><circle cx="30" cy="22" r="4" fill="white" opacity="0.9"/></svg>
+          </div>
+          <div class="polaroid-caption">Выбрать место для отдыха в России</div>
+        </div>
+        <div class="polaroid">
+          <div class="tape"></div>
+          <div class="polaroid-img purple" style="display:flex;align-items:center;justify-content:center;">
+            <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect x="15" y="18" width="30" height="26" rx="4" fill="rgba(255,255,255,0.4)"/><path d="M22 38 Q30 30 38 38" stroke="white" stroke-width="2.5" fill="none"/><circle cx="30" cy="26" r="5" fill="white" opacity="0.8"/></svg>
+          </div>
+          <div class="polaroid-caption">Найти отель или квартиру, где можно остановиться</div>
+        </div>
+        <div class="polaroid">
+          <div class="tape"></div>
+          <div class="polaroid-img pink" style="display:flex;align-items:center;justify-content:center;">
+            <svg width="60" height="60" viewBox="0 0 60 60" fill="none"><rect x="15" y="18" width="30" height="26" rx="4" fill="rgba(255,255,255,0.4)"/><path d="M22 38 Q30 30 38 38" stroke="white" stroke-width="2.5" fill="none"/><circle cx="30" cy="26" r="5" fill="white" opacity="0.8"/></svg>
+          </div>
+          <div class="polaroid-caption">Сделать перелёт комфортным на 10 из 10</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /scroll-content -->
+
+<script>
+// ── Summer countdown ──
+const SUMMER_START_MONTH = 5; // June = 5 (0-indexed)
+const SUMMER_START_DAY   = 1;
+
+let targetDate = getSummerDate(new Date());
+
+function getSummerDate(from) {
+  let d = new Date(from.getFullYear(), SUMMER_START_MONTH, SUMMER_START_DAY, 0, 0, 0);
+  if (d <= from) d = new Date(from.getFullYear() + 1, SUMMER_START_MONTH, SUMMER_START_DAY, 0, 0, 0);
+  return d;
+}
+
+function pad(n) { return String(Math.floor(n)).padStart(2, '0'); }
+
+function updateTimer() {
+  const now  = new Date();
+  const diff = targetDate - now;
+  if (diff <= 0) {
+    document.getElementById('days').textContent    = '00';
+    document.getElementById('hours').textContent   = '00';
+    document.getElementById('minutes').textContent = '00';
+    document.getElementById('seconds').textContent = '00';
+    return;
+  }
+  const days    = Math.floor(diff / 86400000);
+  const hours   = Math.floor((diff % 86400000) / 3600000);
+  const minutes = Math.floor((diff % 3600000)  / 60000);
+  const seconds = Math.floor((diff % 60000)    / 1000);
+  document.getElementById('days').textContent    = pad(days);
+  document.getElementById('hours').textContent   = pad(hours);
+  document.getElementById('minutes').textContent = pad(minutes);
+  document.getElementById('seconds').textContent = pad(seconds);
+}
+
+setInterval(updateTimer, 1000);
+updateTimer();
+
+// ── Ideas carousel ──
+const ideas = [
+  "Посадите что-нибудь. Вам развлечение, знакомому с дачей — помощь. Ну или хотя бы комнатные цветы пересадите.",
+  "Встаньте на рассвете и сходите в любимое место. Это бесплатно и работает лучше любого ретрита.",
+  "Прочитайте книгу, которую откладывали весь год. Лето — лучшее время для неспешного чтения.",
+  "Поешьте мороженое у воды. Звучит просто, но именно такие вещи и запоминаются.",
+  "Устройте пикник без телефонов. Просто еда, друзья и трава под ногами.",
+  "Попробуйте SUP-сёрфинг или каякинг — это не так страшно, как кажется.",
+  "Сделайте фотоальбом или коллаж из снимков прошлого лета. Приятная ностальгия гарантирована.",
+  "Придумайте свой фирменный лимонад. Мята, огурец, малина — что угодно.",
+  "Сходите на кино под открытым небом. Большинство парков летом устраивают такие показы.",
+  "Соберите букет полевых цветов и поставьте на стол. Ничего особенного — и всё же особенное.",
+  "Найдите водопад или озеро, куда ещё не добирались. В любом регионе такое есть.",
+  "Попробуйте ночевать в палатке — хотя бы один раз за лето. Небо со звёздами стоит неудобного спальника.",
+  "Освойте новый рецепт — что-то летнее и свежее. Холодный суп, тарт с черешней, гаспачо.",
+  "Запишитесь на танцы, йогу на улице или занятие по чему-то, о чём давно думали.",
+  "Сходите на рынок утром и купите то, чего никогда не пробовали.",
+  "Прокатитесь на велосипеде по новому маршруту. Даже по городу — уже другие ощущения.",
+  "Сделайте что-то руками: сплетите браслет, покрасьте горшок, сшейте наволочку.",
+  "Посмотрите закат с необычной точки — крыши, холма, набережной.",
+  "Попробуйте вставать на час раньше пять дней подряд. Утреннее лето — совсем другой мир.",
+  "Организуйте тематический ужин под открытым небом: Италия, Азия, Прованс — что угодно.",
+  "Нырните в холодную воду. Один раз. Адреналин и гордость гарантированы.",
+  "Найдите место в вашем городе, куда вы никогда не ходили, и проведите там день.",
+  "Напишите список из 10 вещей, за которые вы благодарны этому лету — в конце августа.",
+  "Посетите местный фестиваль или ярмарку. Они везде летом — надо просто поискать.",
+  "Поиграйте в бадминтон, волейбол или фрисби. Это смешно и физически приятно.",
+  "Попробуйте медитацию на природе: 10 минут тишины у воды или в парке.",
+  "Сходите в гости без повода — просто потому что давно не виделись.",
+  "Пройдите пешком маршрут, который обычно проезжаете на транспорте.",
+  "Купите что-нибудь на блошином рынке. Случайная вещь с историей — отличный сувенир лета.",
+  "Встретьте бабье лето осознанно: запишите, каким было это лето, и что вы из него берёте."
+];
+
+let currentIdea = 0;
+
+function showIdea(idx, dir) {
+  const txt = document.getElementById('ideaText');
+  const num = document.getElementById('ideaNum');
+  const ctr = document.getElementById('ideaCurrent');
+  txt.classList.add('fading');
+  setTimeout(() => {
+    txt.textContent = ideas[idx];
+    num.textContent = idx + 1;
+    ctr.textContent = idx + 1;
+    txt.classList.remove('fading');
+  }, 220);
+}
+
+document.getElementById('nextIdea').addEventListener('click', () => {
+  currentIdea = (currentIdea + 1) % ideas.length;
+  showIdea(currentIdea, 1);
+});
+document.getElementById('prevIdea').addEventListener('click', () => {
+  currentIdea = (currentIdea - 1 + ideas.length) % ideas.length;
+  showIdea(currentIdea, -1);
+});
+
+// ── Scroll emerge animations ──
+const cards = document.querySelectorAll('.glass-card');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+cards.forEach(card => observer.observe(card));
+
+// ── Character swaps image based on scroll position ──
+const charImg = document.querySelector('#character img');
+
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+  if (scrolled > 0.2) {
+    charImg.src = 'bunny2.png';
+    charImg.style.width = '110%';
+  } else {
+    charImg.src = 'bunny.png';
+    charImg.style.width = '100%';
+  }
+});
+
+</script>
+</body>
+</html>

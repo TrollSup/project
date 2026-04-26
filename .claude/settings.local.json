@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Dimasik/Desktop/**)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(mkdir -p ~/.claude/skills)",
+      "Bash(git clone *)",
+      "WebFetch(domain:app.holst.so)",
+      "WebFetch(domain:www.klerk.ru)",
+      "WebSearch",
+      "WebFetch(domain:edu.klerk.ru)"
+    ]
+  }
+}
